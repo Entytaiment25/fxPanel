@@ -7,7 +7,7 @@ import type { PlayerDropsSummaryHour } from '@shared/otherTypes';
 import { PlayerDropsLoadingSpinner } from './PlayerDropsGenericSubcards';
 import TimelineDropsChart, { TimelineDropsChartData } from './TimelineDropsChart';
 import { processDropsSummary } from './chartingUtils';
-import { DisplayLodType, DrilldownRangeSelectionType } from './PlayerDropsPage';
+import { DisplayLodType, DrilldownRangeSelectionType } from '@/pages/PlayerDropsPage/PlayerDropsPage';
 
 type PlayerDropsTimelineChartsProps = {
     isError?: boolean;

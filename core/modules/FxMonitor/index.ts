@@ -95,7 +95,7 @@ class LimitedArray<T> extends Array<T> {
  * Module responsible for monitoring the FXServer health and status, restarting it if necessary.
  */
 export default class FxMonitor {
-    public readonly timers: NodeJS.Timer[] = [];
+    public readonly timers: ReturnType<typeof setInterval>[] = [];
 
     //Status tracking
     private readonly statusLog = new LimitedArray<StatusLogEntry>(MAX_LOG_ENTRIES);

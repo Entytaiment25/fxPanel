@@ -1,5 +1,5 @@
-import type { RoomType } from '../webSocket';
-import { AuthedAdminType } from '../authLogic';
+import type { RoomType } from '@modules/WebServer/webSocket';
+import { AuthedAdminType } from '@modules/WebServer/authLogic';
 import type { LiveConsoleInitialData } from '@shared/consoleBlock';
 
 //Tracks the clear sequence per admin session (by admin name)

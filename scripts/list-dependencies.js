@@ -114,8 +114,8 @@ const ignoredPrefixes = [
     '@/',
 ];
 const validExtensions = ['.cjs', '.js', '.ts', '.jsx', '.tsx'];
-const importRegex = /import\s+.+\s+from\s+['"](.*)['"]/gm;
-const requireRegex = /(?:require|import)\s*\(\s*['"](.*)['"]\s*\)/gm;
+const importRegex = /^(?!\s*\/\/)\s*import\s+.+?\s+from\s+['"]([^'"]+)['"]/gm;
+const requireRegex = /^(?!\s*\/\/).*?\b(?:require|import)\s*\(\s*['"]([^'"]+)['"]\s*\)/gm;
 
 //Resolve a relative import specifier to an absolute file path
 const resolveLocalImport = (fromFile, specifier) => {

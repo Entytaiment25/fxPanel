@@ -1,8 +1,13 @@
 const modulename = 'WebServer:SessionMws';
 import fs from 'node:fs';
-import type { CfxreSessAuthType, DiscordSessAuthType, PassSessAuthType, Pending2faSessAuthType } from '../authLogic';
+import type {
+    CfxreSessAuthType,
+    DiscordSessAuthType,
+    PassSessAuthType,
+    Pending2faSessAuthType,
+} from '@modules/WebServer/authLogic';
 import { LRUCacheWithDelete } from 'mnemonist';
-import { RawKoaCtx } from '../ctxTypes';
+import { RawKoaCtx } from '@modules/WebServer/ctxTypes';
 import { Next } from 'koa';
 import { randomUUID } from 'node:crypto';
 import { Socket } from 'socket.io';

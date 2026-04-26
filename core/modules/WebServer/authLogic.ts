@@ -1,7 +1,7 @@
 const modulename = 'WebServer:AuthLogic';
 import { z } from 'zod';
 import consoleFactory from '@lib/console';
-import type { SessToolsType } from './middlewares/sessionMws';
+import type { SessToolsType } from '@modules/WebServer/middlewares/sessionMws';
 import { StoredAdmin, AuthedAdmin } from '@modules/AdminStore/adminClasses';
 export { AuthedAdmin, StoredAdmin };
 export type { AuthedAdminType } from '@modules/AdminStore/adminClasses';

@@ -1,5 +1,5 @@
 const modulename = 'WebServer:ServeStaticMw';
-import path from 'path';
+import path from 'node:path';
 import consoleFactory from '@lib/console';
 import type { Next } from 'koa';
 import type { RawKoaCtx } from '../ctxTypes';

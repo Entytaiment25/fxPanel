@@ -1,4 +1,4 @@
-import { isBrowserEnv } from './miscUtils';
+import { isBrowserEnv } from '@/utils/miscUtils';
 
 const WEBPIPE_PATH = 'https://monitor/WebPipe';
 
