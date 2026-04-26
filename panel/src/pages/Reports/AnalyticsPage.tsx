@@ -88,9 +88,7 @@ export default function AnalyticsPage() {
     const { overview, byCategory, byPriority, timelineDays, leaderboard } = data;
 
     const resolutionRate =
-        overview.total > 0
-            ? Math.round(((overview.resolved + overview.closed) / overview.total) * 100)
-            : 0;
+        overview.total > 0 ? Math.round(((overview.resolved + overview.closed) / overview.total) * 100) : 0;
 
     const statusRows = [
         { label: 'Open', count: overview.open, colorClass: 'bg-destructive' },
@@ -110,14 +108,24 @@ export default function AnalyticsPage() {
                 <span className="text-muted-foreground text-sm">Last 30 days</span>
             </PageHeader>
 
-            <div className="flex-1 min-h-0 overflow-auto space-y-6 pb-4">
+            <div className="min-h-0 flex-1 space-y-6 overflow-auto pb-4">
                 {/* Stat row */}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                     <StatCard icon={InboxIcon} label="Total Tickets" value={overview.total} />
                     <StatCard icon={ClockIcon} label="Open" value={overview.open} iconClass="text-destructive" />
                     <StatCard icon={SearchIcon} label="In Review" value={overview.inReview} iconClass="text-warning" />
-                    <StatCard icon={CheckCircle2Icon} label="Resolved" value={overview.resolved} iconClass="text-success" />
-                    <StatCard icon={XCircleIcon} label="Closed" value={overview.closed} iconClass="text-muted-foreground" />
+                    <StatCard
+                        icon={CheckCircle2Icon}
+                        label="Resolved"
+                        value={overview.resolved}
+                        iconClass="text-success"
+                    />
+                    <StatCard
+                        icon={XCircleIcon}
+                        label="Closed"
+                        value={overview.closed}
+                        iconClass="text-muted-foreground"
+                    />
                     <StatCard icon={ClockIcon} label="Avg Resolution" value={msToHuman(overview.avgResolutionMs)} />
                 </div>
 
@@ -143,12 +151,14 @@ export default function AnalyticsPage() {
                                             <tr key={day.date} className={i % 2 === 0 ? '' : 'bg-secondary/10'}>
                                                 <td className="text-muted-foreground px-3 py-1.5">{day.date}</td>
                                                 <td className="px-3 py-1.5 text-right">{day.created}</td>
-                                                <td className="px-3 py-1.5 text-right text-success">{day.resolved}</td>
+                                                <td className="text-success px-3 py-1.5 text-right">{day.resolved}</td>
                                             </tr>
                                         ))}
                                         {timelineDays.length === 0 && (
                                             <tr>
-                                                <td colSpan={3} className="text-muted-foreground px-3 py-4 text-center">No data</td>
+                                                <td colSpan={3} className="text-muted-foreground px-3 py-4 text-center">
+                                                    No data
+                                                </td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -169,15 +179,21 @@ export default function AnalyticsPage() {
                                 <CardContent>
                                     <div className="space-y-2">
                                         {byCategory.map((row) => {
-                                            const pct = overview.total > 0 ? Math.round((row.count / overview.total) * 100) : 0;
+                                            const pct =
+                                                overview.total > 0 ? Math.round((row.count / overview.total) * 100) : 0;
                                             return (
                                                 <div key={row.category}>
                                                     <div className="mb-1 flex justify-between text-sm">
                                                         <span>{row.category}</span>
-                                                        <span className="text-muted-foreground">{row.count} ({pct}%)</span>
+                                                        <span className="text-muted-foreground">
+                                                            {row.count} ({pct}%)
+                                                        </span>
                                                     </div>
                                                     <div className="bg-secondary/30 h-1.5 rounded-full">
-                                                        <div className="bg-accent h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                                                        <div
+                                                            className="bg-accent h-1.5 rounded-full"
+                                                            style={{ width: `${pct}%` }}
+                                                        />
                                                     </div>
                                                 </div>
                                             );
@@ -193,8 +209,13 @@ export default function AnalyticsPage() {
                                 </CardHeader>
                                 <CardContent className="flex flex-wrap gap-2">
                                     {byPriority.map((row) => (
-                                        <div key={row.priority} className="bg-secondary/20 flex flex-1 flex-col items-center rounded-lg p-3 border border-border/40">
-                                            <span className="text-muted-foreground text-xs capitalize">{row.priority}</span>
+                                        <div
+                                            key={row.priority}
+                                            className="bg-secondary/20 border-border/40 flex flex-1 flex-col items-center rounded-lg border p-3"
+                                        >
+                                            <span className="text-muted-foreground text-xs capitalize">
+                                                {row.priority}
+                                            </span>
                                             <span className="text-lg font-bold">{row.count}</span>
                                         </div>
                                     ))}
@@ -225,13 +246,20 @@ export default function AnalyticsPage() {
                                         <div key={row.label}>
                                             <div className="mb-1 flex items-center justify-between text-sm">
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className={`inline-block h-2 w-2 rounded-full ${row.colorClass}`} />
+                                                    <span
+                                                        className={`inline-block h-2 w-2 rounded-full ${row.colorClass}`}
+                                                    />
                                                     <span>{row.label}</span>
                                                 </div>
-                                                <span className="text-muted-foreground">{row.count} ({pct}%)</span>
+                                                <span className="text-muted-foreground">
+                                                    {row.count} ({pct}%)
+                                                </span>
                                             </div>
                                             <div className="bg-secondary/30 h-2 rounded-full">
-                                                <div className={`${row.colorClass} h-2 rounded-full transition-all`} style={{ width: `${pct}%` }} />
+                                                <div
+                                                    className={`${row.colorClass} h-2 rounded-full transition-all`}
+                                                    style={{ width: `${pct}%` }}
+                                                />
                                             </div>
                                         </div>
                                     );
@@ -239,7 +267,7 @@ export default function AnalyticsPage() {
                             </div>
 
                             {/* Avg resolution callout */}
-                            <div className="bg-secondary/20 rounded-lg border border-border/40 p-3 text-center">
+                            <div className="bg-secondary/20 border-border/40 rounded-lg border p-3 text-center">
                                 <p className="text-muted-foreground text-xs">Avg. Resolution Time</p>
                                 <p className="text-2xl font-bold">{msToHuman(overview.avgResolutionMs)}</p>
                             </div>
@@ -268,7 +296,10 @@ export default function AnalyticsPage() {
                                     </thead>
                                     <tbody>
                                         {leaderboard.map((row, i) => (
-                                            <tr key={`${row.adminName}-${i}`} className={i % 2 === 0 ? '' : 'bg-secondary/10'}>
+                                            <tr
+                                                key={`${row.adminName}-${i}`}
+                                                className={i % 2 === 0 ? '' : 'bg-secondary/10'}
+                                            >
                                                 <td className="text-muted-foreground px-3 py-2">
                                                     {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
                                                 </td>

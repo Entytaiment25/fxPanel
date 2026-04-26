@@ -28,13 +28,11 @@ function ServerIdentity() {
     return (
         <div className="flex min-w-0 items-center gap-2.5">
             <span
-                className={cn(
-                    'relative flex h-2 w-2 shrink-0 items-center justify-center',
-                )}
+                className={cn('relative flex h-2 w-2 shrink-0 items-center justify-center')}
                 title={isOnline ? 'Server online' : 'Server offline'}
             >
                 {isOnline && (
-                    <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping bg-success/60" />
+                    <span className="bg-success/60 absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" />
                 )}
                 <span
                     className={cn(
@@ -76,7 +74,7 @@ function IconButton({ label, icon, badge, onClick }: IconButtonProps) {
         >
             {icon}
             {badge ? (
-                <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono text-[9px] font-bold leading-none">
+                <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono text-[9px] leading-none font-bold">
                     {badge}
                 </span>
             ) : null}
@@ -106,7 +104,7 @@ function AuthedHeaderFragment() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
                 <div className="border-border/40 border-b px-2 pt-1 pb-2">
-                    <p className="text-foreground truncate text-sm font-semibold leading-tight">{authData.name}</p>
+                    <p className="text-foreground truncate text-sm leading-tight font-semibold">{authData.name}</p>
                     <p className="text-muted-foreground/70 mt-0.5 text-xs">Signed in</p>
                 </div>
                 <DropdownMenuItem className="cursor-pointer" onClick={() => setAccountModalOpen(true)}>
@@ -149,13 +147,9 @@ export function Header() {
     const playerCount = useAtomValue(playerCountAtom);
 
     return (
-        <header className="border-border/40 bg-[#0c0e16]/95 sticky top-0 z-20 border-b shadow-lg shadow-black/30 backdrop-blur-sm lg:hidden">
+        <header className="border-border/40 sticky top-0 z-20 border-b bg-[#0c0e16]/95 shadow-lg shadow-black/30 backdrop-blur-sm lg:hidden">
             <div className="flex h-14 w-full items-center gap-2 px-3">
-                <IconButton
-                    label="Open menu"
-                    icon={<MenuIcon />}
-                    onClick={() => openMenu(true)}
-                />
+                <IconButton label="Open menu" icon={<MenuIcon />} onClick={() => openMenu(true)} />
                 <div className="bg-border/40 h-6 w-px" />
                 <div className="min-w-0 flex-1">
                     <ServerIdentity />

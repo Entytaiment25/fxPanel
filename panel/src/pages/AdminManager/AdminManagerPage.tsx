@@ -297,7 +297,9 @@ export default function AdminManagerPage() {
             if (successCount === 0) {
                 txToast.error(`Failed to apply permissions to all admins: ${failedNames.join(', ')}`);
             } else if (successCount < results.length) {
-                txToast.warning(`Applied permissions to ${successCount}/${results.length} admins. Failed: ${failedNames.join(', ')}`);
+                txToast.warning(
+                    `Applied permissions to ${successCount}/${results.length} admins. Failed: ${failedNames.join(', ')}`,
+                );
             } else {
                 txToast.success(`Applied permissions to ${successCount} admin${successCount !== 1 ? 's' : ''}.`);
             }
@@ -501,7 +503,8 @@ export default function AdminManagerPage() {
                             <DialogDescription>
                                 Choose the permissions to apply to {eligibleCount} eligible admin
                                 {eligibleCount !== 1 ? 's' : ''}. This will replace their current permissions.
-                                {skippedCount > 0 && ` (${skippedCount} master admin${skippedCount !== 1 ? 's' : ''} and/or yourself will be skipped.)`}
+                                {skippedCount > 0 &&
+                                    ` (${skippedCount} master admin${skippedCount !== 1 ? 's' : ''} and/or yourself will be skipped.)`}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="-mx-6 min-h-0 flex-1 overflow-y-auto px-6">

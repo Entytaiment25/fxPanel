@@ -208,7 +208,6 @@ function StepInput({
                         className="text-primary underline"
                     >
                         portal.cfx.re
-
                     </a>
                 </p>
             </div>

@@ -26,7 +26,7 @@ export default async function FxArtifactDownload(ctx: AuthedCtx) {
     }
     try {
         const parsed = new URL(url);
-        if (!ALLOWED_DOWNLOAD_DOMAINS.includes(parsed.hostname as typeof ALLOWED_DOWNLOAD_DOMAINS[number])) {
+        if (!ALLOWED_DOWNLOAD_DOMAINS.includes(parsed.hostname as (typeof ALLOWED_DOWNLOAD_DOMAINS)[number])) {
             return ctx.send<ApiToastResp>({
                 type: 'error',
                 msg: `Download URL hostname is not allowed. Permitted: ${ALLOWED_DOWNLOAD_DOMAINS.join(', ')}`,

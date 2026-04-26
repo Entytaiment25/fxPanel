@@ -144,11 +144,7 @@ export default function EmbedEditorPage() {
                         <p className="text-muted-foreground">
                             The server status embed is customizable by editing the JSON below. <br />
                             You can use the placeholders to include dynamic server information in the embed. <br />
-                            For information refer to{' '}
-                            <TxAnchor href="https://fxpanel.org/docs">
-                                our docs
-                            </TxAnchor>
-                            .
+                            For information refer to <TxAnchor href="https://fxpanel.org/docs">our docs</TxAnchor>.
                         </p>
                         <Button
                             variant="outline"

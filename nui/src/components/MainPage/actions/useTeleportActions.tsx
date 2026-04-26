@@ -5,7 +5,6 @@ import { fetchNui } from '../../../utils/fetchNui';
 import { useTranslate } from 'react-polyglot';
 import { useSnackbar } from 'notistack';
 import { TeleportMode, useTeleportMode } from '../../../state/teleportmode.state';
-import { copyToClipboard } from '../../../utils/copyToClipboard';
 import { useNuiEvent } from '@nui/src/hooks/useNuiEvent';
 import { usePlayerModalContext } from '@nui/src/provider/PlayerModalProvider';
 
@@ -47,12 +46,8 @@ export function useTeleportActions() {
     };
 
     const handleCopyCoords = () => {
-        fetchNui<{ coords: string }>('copyCurrentCoords')
-            .then(({ coords }) => {
-                if (!coords) {
-                    return enqueueSnackbar(t('nui_menu.common.error'), { variant: 'error' });
-                }
-                copyToClipboard(coords);
+        fetchNui('copyCurrentCoords')
+            .then(() => {
                 enqueueSnackbar(t('nui_menu.common.copied'), { variant: 'success' });
             })
             .catch(() => {

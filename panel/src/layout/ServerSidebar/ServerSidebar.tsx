@@ -31,13 +31,21 @@ export function ServerSidebar({ isSheet }: ServerSidebarProps) {
                 <ServerStatus />
                 <ServerSchedule />
             </div>
-            {statusWidgets.length > 0 && statusWidgets.map((w) => (
-                <ErrorBoundary key={`${w.addonId}-${w.title}`} fallback={<div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">Addon error: {w.title}</div>}>
-                    <div className={cn(!isSheet && 'bg-card text-card-foreground rounded-xl border p-4 shadow-xs')}>
-                        <w.Component />
-                    </div>
-                </ErrorBoundary>
-            ))}
+            {statusWidgets.length > 0 &&
+                statusWidgets.map((w) => (
+                    <ErrorBoundary
+                        key={`${w.addonId}-${w.title}`}
+                        fallback={
+                            <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border p-3 text-xs">
+                                Addon error: {w.title}
+                            </div>
+                        }
+                    >
+                        <div className={cn(!isSheet && 'bg-card text-card-foreground rounded-xl border p-4 shadow-xs')}>
+                            <w.Component />
+                        </div>
+                    </ErrorBoundary>
+                ))}
             <hr className={isSheet ? 'block' : 'hidden'} />
 
             {window.txConsts.isWebInterface ? (

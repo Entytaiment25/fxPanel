@@ -48,7 +48,11 @@ export default function AdvancedPage() {
 
     const { data, mutate } = useSWR('/advanced/data', swrDataFetcher);
 
-    const handleAction = (action: string, parameter: string | boolean = false, onSuccess?: (d: AdvancedActionResp) => void) => {
+    const handleAction = (
+        action: string,
+        parameter: string | boolean = false,
+        onSuccess?: (d: AdvancedActionResp) => void,
+    ) => {
         setIsRunning(true);
         actionApi({
             data: { action, parameter },

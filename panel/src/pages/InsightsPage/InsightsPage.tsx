@@ -70,10 +70,7 @@ type WithError = { error: string };
  * fallback, and normalizes the result into { isLoading, hasError, errorMsg,
  * successData } so each card body can render the three branches uniformly.
  */
-function useInsightData<T extends object>(
-    path: string,
-    devMockSelector: (mock: DevMockInsights) => T | WithError,
-) {
+function useInsightData<T extends object>(path: string, devMockSelector: (mock: DevMockInsights) => T | WithError) {
     const api = useBackendApi<T | WithError>({ method: 'GET', path });
     const { data, error, isLoading } = useSWR<T | WithError>(
         path,
@@ -87,9 +84,7 @@ function useInsightData<T extends object>(
     );
     const dataHasError = !!data && 'error' in data;
     const hasError = !!error || dataHasError;
-    const errorMsg = hasError
-        ? (dataHasError ? (data as WithError).error : 'Failed to load')
-        : '';
+    const errorMsg = hasError ? (dataHasError ? (data as WithError).error : 'Failed to load') : '';
     const successData: T | null = data && !dataHasError ? (data as T) : null;
     return { isLoading, hasError, errorMsg, successData };
 }
@@ -107,11 +102,7 @@ function CardLoading() {
 }
 
 function CardError({ message }: { message: string }) {
-    return (
-        <div className="text-muted-foreground flex items-center justify-center py-12 text-sm">
-            {message}
-        </div>
-    );
+    return <div className="text-muted-foreground flex items-center justify-center py-12 text-sm">{message}</div>;
 }
 
 const formatPlayTime = (minutes: number) => {
@@ -134,13 +125,13 @@ type InsightsCardProps = {
 function InsightsCard({ icon, title, subtitle, action, className, children }: InsightsCardProps) {
     return (
         <Card className={cn('overflow-hidden', className)}>
-            <div className="flex flex-col gap-2 border-b border-border/40 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4">
+            <div className="border-border/40 flex flex-col gap-2 border-b px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4">
                 <div className="flex min-w-0 items-center gap-3">
                     <div className="bg-secondary/40 border-border/50 text-accent/80 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border [&>svg]:size-4">
                         {icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-semibold leading-tight tracking-tight">{title}</h3>
+                        <h3 className="text-sm leading-tight font-semibold tracking-tight">{title}</h3>
                         {subtitle ? (
                             <p className="text-muted-foreground/70 mt-0.5 truncate text-xs">{subtitle}</p>
                         ) : null}
@@ -163,10 +154,8 @@ function SectionHeading({ icon, title, description }: { icon: ReactNode; title: 
             <div className="bg-primary/60 h-7 w-0.5 shrink-0 rounded-full" />
             <div className="text-muted-foreground/80 [&>svg]:size-4">{icon}</div>
             <div>
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground/90">{title}</h2>
-                {description ? (
-                    <p className="text-muted-foreground/60 text-xs">{description}</p>
-                ) : null}
+                <h2 className="text-foreground/90 text-sm font-semibold tracking-wider uppercase">{title}</h2>
+                {description ? <p className="text-muted-foreground/60 text-xs">{description}</p> : null}
             </div>
         </div>
     );
@@ -197,7 +186,11 @@ function PlayerCountCard() {
             subtitle="Long-term population and host memory trend"
             action={successData ? <HeadlinePill label="Peak" value={`${successData.peakCount} players`} /> : null}
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <PlayerCountChart series={successData!.series} />
             )}
         </InsightsCard>
@@ -214,9 +207,15 @@ function NewPlayersCard() {
             icon={<UserPlusIcon />}
             title="New Players Per Day"
             subtitle="First-seen players over time"
-            action={successData ? <HeadlinePill label="Total" value={successData.totalPlayers.toLocaleString()} /> : null}
+            action={
+                successData ? <HeadlinePill label="Total" value={successData.totalPlayers.toLocaleString()} /> : null
+            }
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <NewPlayersChart daily={successData!.daily} />
             )}
         </InsightsCard>
@@ -233,15 +232,21 @@ function PlaytimeDistCard() {
             icon={<BarChart3Icon />}
             title="Playtime Distribution"
             subtitle="How much total time players accumulate"
-            action={successData ? (
-                <>
-                    <HeadlinePill label="Median" value={formatPlayTime(successData.medianMinutes)} />
-                    <span className="text-muted-foreground/40">·</span>
-                    <HeadlinePill label="Avg" value={formatPlayTime(successData.averageMinutes)} />
-                </>
-            ) : null}
+            action={
+                successData ? (
+                    <>
+                        <HeadlinePill label="Median" value={formatPlayTime(successData.medianMinutes)} />
+                        <span className="text-muted-foreground/40">·</span>
+                        <HeadlinePill label="Avg" value={formatPlayTime(successData.averageMinutes)} />
+                    </>
+                ) : null
+            }
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <PlaytimeDistChart buckets={successData!.buckets} />
             )}
         </InsightsCard>
@@ -255,25 +260,30 @@ function TopPlayersCard() {
     );
     const openPlayerModal = useOpenPlayerModal();
     return (
-        <InsightsCard
-            icon={<CrownIcon />}
-            title="Top Players by Playtime"
-            subtitle="All-time leaderboard"
-        >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+        <InsightsCard icon={<CrownIcon />} title="Top Players by Playtime" subtitle="All-time leaderboard">
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <div className="max-h-84 space-y-0.5 overflow-y-auto pr-1">
                     {successData!.players.map((player, i) => (
                         <div
                             key={player.license}
                             className="hover:bg-secondary/30 flex items-center gap-3 rounded-md px-2 py-1.5 text-sm transition-colors"
                         >
-                            <span className={cn(
-                                'w-6 shrink-0 text-right font-mono text-xs',
-                                i === 0 ? 'text-warning font-bold' :
-                                    i === 1 ? 'text-muted-foreground font-semibold' :
-                                        i === 2 ? 'text-accent font-semibold' :
-                                            'text-muted-foreground/50',
-                            )}>
+                            <span
+                                className={cn(
+                                    'w-6 shrink-0 text-right font-mono text-xs',
+                                    i === 0
+                                        ? 'text-warning font-bold'
+                                        : i === 1
+                                          ? 'text-muted-foreground font-semibold'
+                                          : i === 2
+                                            ? 'text-accent font-semibold'
+                                            : 'text-muted-foreground/50',
+                                )}
+                            >
                                 {i + 1}
                             </span>
                             <button
@@ -314,14 +324,20 @@ function RetentionCard() {
             icon={<TrendingUpIcon />}
             title="Player Retention"
             subtitle="Do players come back?"
-            action={successData ? (
-                <HeadlinePill label="Sample" value={`${successData.sampleSize.toLocaleString()} players`} />
-            ) : null}
+            action={
+                successData ? (
+                    <HeadlinePill label="Sample" value={`${successData.sampleSize.toLocaleString()} players`} />
+                ) : null
+            }
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <div className="space-y-4">
                     <div>
-                        <h4 className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider">
+                        <h4 className="text-muted-foreground mb-2 text-xs font-medium tracking-wider uppercase">
                             Return Rate (joined 30+ days ago)
                         </h4>
                         <div className="grid grid-cols-3 gap-2">
@@ -331,7 +347,7 @@ function RetentionCard() {
                         </div>
                     </div>
                     <div>
-                        <h4 className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider">
+                        <h4 className="text-muted-foreground mb-2 text-xs font-medium tracking-wider uppercase">
                             Current Activity (all players)
                         </h4>
                         <div className="grid grid-cols-2 gap-2">
@@ -357,7 +373,11 @@ function UptimeCard() {
             title="Server Uptime Timeline"
             subtitle="Historical up / down segments"
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <UptimeTimeline segments={successData!.segments} />
             )}
         </InsightsCard>
@@ -365,20 +385,21 @@ function UptimeCard() {
 }
 
 function DisconnectReasonsCard() {
-    const { isLoading, hasError, errorMsg, successData } = useInsightData<Exclude<InsightsDisconnectReasonsResp, WithError>>(
-        '/insights/disconnectReasons',
-        (mock) => mock.disconnectReasons,
-    );
+    const { isLoading, hasError, errorMsg, successData } = useInsightData<
+        Exclude<InsightsDisconnectReasonsResp, WithError>
+    >('/insights/disconnectReasons', (mock) => mock.disconnectReasons);
     return (
         <InsightsCard
             icon={<WifiOffIcon />}
             title="Disconnect Reasons"
             subtitle="Last 14 days · logged disconnects"
-            action={successData ? (
-                <HeadlinePill label="Total" value={successData.totalDrops.toLocaleString()} />
-            ) : null}
+            action={successData ? <HeadlinePill label="Total" value={successData.totalDrops.toLocaleString()} /> : null}
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <DisconnectReasonsChart categories={successData!.categories} />
             )}
         </InsightsCard>
@@ -391,12 +412,12 @@ function PeakHoursCard() {
         (mock) => mock.peakHours,
     );
     return (
-        <InsightsCard
-            icon={<SignalIcon />}
-            title="Peak Hours"
-            subtitle="Average players by weekday & hour"
-        >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+        <InsightsCard icon={<SignalIcon />} title="Peak Hours" subtitle="Average players by weekday & hour">
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <PeakHoursHeatmap cells={successData!.cells} maxAvg={successData!.maxAvg} />
             )}
         </InsightsCard>
@@ -404,10 +425,9 @@ function PeakHoursCard() {
 }
 
 function ActionsTimelineCard() {
-    const { isLoading, hasError, errorMsg, successData } = useInsightData<Exclude<InsightsActionsTimelineResp, WithError>>(
-        '/insights/actionsTimeline',
-        (mock) => mock.actionsTimeline,
-    );
+    const { isLoading, hasError, errorMsg, successData } = useInsightData<
+        Exclude<InsightsActionsTimelineResp, WithError>
+    >('/insights/actionsTimeline', (mock) => mock.actionsTimeline);
     return (
         <InsightsCard
             className="col-span-full"
@@ -415,7 +435,11 @@ function ActionsTimelineCard() {
             title="Moderation Activity"
             subtitle="Warns, kicks, bans and more over time"
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <ActionsTimelineChart daily={successData!.daily} />
             )}
         </InsightsCard>
@@ -432,11 +456,15 @@ function PlayerGrowthCard() {
             icon={<LineChartIcon />}
             title="Player Growth"
             subtitle="Cumulative unique players over time"
-            action={successData ? (
-                <HeadlinePill label="Total" value={successData.totalPlayers.toLocaleString()} />
-            ) : null}
+            action={
+                successData ? <HeadlinePill label="Total" value={successData.totalPlayers.toLocaleString()} /> : null
+            }
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <PlayerGrowthChart data={successData!.data} />
             )}
         </InsightsCard>
@@ -444,24 +472,33 @@ function PlayerGrowthCard() {
 }
 
 function SessionLengthCard() {
-    const { isLoading, hasError, errorMsg, successData } = useInsightData<Exclude<InsightsSessionLengthResp, WithError>>(
-        '/insights/sessionLength',
-        (mock) => mock.sessionLength,
-    );
+    const { isLoading, hasError, errorMsg, successData } = useInsightData<
+        Exclude<InsightsSessionLengthResp, WithError>
+    >('/insights/sessionLength', (mock) => mock.sessionLength);
     return (
         <InsightsCard
             icon={<ClockIcon />}
             title="Session Length"
-            subtitle={successData ? `${successData.totalSessions.toLocaleString()} sessions · ${successData.hoursAnalyzed}h analyzed` : 'How long sessions typically last'}
-            action={successData ? (
-                <>
-                    <HeadlinePill label="Avg" value={formatPlayTime(successData.avgMinutes)} />
-                    <span className="text-muted-foreground/40">·</span>
-                    <HeadlinePill label="Median" value={formatPlayTime(successData.medianMinutes)} />
-                </>
-            ) : null}
+            subtitle={
+                successData
+                    ? `${successData.totalSessions.toLocaleString()} sessions · ${successData.hoursAnalyzed}h analyzed`
+                    : 'How long sessions typically last'
+            }
+            action={
+                successData ? (
+                    <>
+                        <HeadlinePill label="Avg" value={formatPlayTime(successData.avgMinutes)} />
+                        <span className="text-muted-foreground/40">·</span>
+                        <HeadlinePill label="Median" value={formatPlayTime(successData.medianMinutes)} />
+                    </>
+                ) : null
+            }
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <SessionLengthChart buckets={successData!.buckets} />
             )}
         </InsightsCard>
@@ -478,11 +515,13 @@ function DailyPlayersCard() {
             icon={<UsersIcon />}
             title="New vs Returning Players"
             subtitle="Daily breakdown of who showed up"
-            action={successData ? (
-                <HeadlinePill label="Window" value={`${successData.daysAnalyzed}d`} />
-            ) : null}
+            action={successData ? <HeadlinePill label="Window" value={`${successData.daysAnalyzed}d`} /> : null}
         >
-            {isLoading ? <CardLoading /> : hasError ? <CardError message={errorMsg} /> : (
+            {isLoading ? (
+                <CardLoading />
+            ) : hasError ? (
+                <CardError message={errorMsg} />
+            ) : (
                 <DailyPlayersChart daily={successData!.daily} />
             )}
         </InsightsCard>

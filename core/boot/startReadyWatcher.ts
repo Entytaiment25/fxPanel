@@ -46,24 +46,26 @@ const fetchPublicIp = async (apis: string[][], validator: z.ZodType<string>) => 
     return false;
 };
 
-const getPublicIpv4 = () => fetchPublicIp(
-    [
-        ['https://api.ipify.org?format=json', 'ip'],
-        ['https://api.myip.com', 'ip'],
-        ['https://ipv4.jsonip.com/', 'ip'],
-        ['https://api.my-ip.io/v2/ip.json', 'ip'],
-        ['https://www.l2.io/ip.json', 'ip'],
-    ],
-    z.string().ip({ version: 'v4' }),
-);
+const getPublicIpv4 = () =>
+    fetchPublicIp(
+        [
+            ['https://api.ipify.org?format=json', 'ip'],
+            ['https://api.myip.com', 'ip'],
+            ['https://ipv4.jsonip.com/', 'ip'],
+            ['https://api.my-ip.io/v2/ip.json', 'ip'],
+            ['https://www.l2.io/ip.json', 'ip'],
+        ],
+        z.ipv4(),
+    );
 
-const getPublicIpv6 = () => fetchPublicIp(
-    [
-        ['https://api6.ipify.org?format=json', 'ip'],
-        ['https://api6.my-ip.io/v2/ip.json', 'ip'],
-    ],
-    z.string().ip({ version: 'v6' }),
-);
+const getPublicIpv6 = () =>
+    fetchPublicIp(
+        [
+            ['https://api6.ipify.org?format=json', 'ip'],
+            ['https://api6.my-ip.io/v2/ip.json', 'ip'],
+        ],
+        z.ipv6(),
+    );
 
 const getOSMessage = async () => {
     const serverMessage = [
@@ -179,9 +181,9 @@ export const startReadyWatcher = async (cb: () => void) => {
     const bannerUrls = txHostConfig.txaUrl
         ? [txHostConfig.txaUrl]
         : detectedUrls.map((addr) => {
-            const host = addr.includes(':') ? `[${addr}]` : addr;
-            return `http://${host}:${txHostConfig.txaPort}/`;
-        });
+              const host = addr.includes(':') ? `[${addr}]` : addr;
+              return `http://${host}:${txHostConfig.txaPort}/`;
+          });
 
     //Admin PIN
     const adminMasterPin = 'value' in adminPinRes && adminPinRes.value ? adminPinRes.value : false;

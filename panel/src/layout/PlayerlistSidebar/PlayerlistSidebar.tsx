@@ -12,9 +12,9 @@ export function PlayerlistSidebar({ isSheet }: PlayerSidebarProps) {
                 'z-10 flex-col',
                 isSheet
                     ? 'flex h-screen w-full'
-                    // Only show inline on xl+; on narrower viewports the mobile
-                    // header's Players button opens it as a sheet instead.
-                    : 'tx-sidebar h-contentvh hidden gap-4 xl:flex',
+                    : // Only show inline on xl+; on narrower viewports the mobile
+                      // header's Players button opens it as a sheet instead.
+                      'tx-sidebar h-contentvh hidden gap-4 xl:flex',
             )}
         >
             <div

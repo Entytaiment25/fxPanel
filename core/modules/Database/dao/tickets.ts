@@ -160,10 +160,10 @@ export default class TicketsDao {
 
         // Validate the transition: only allow moves along sensible paths.
         const allowedTransitions: Record<TicketStatus, TicketStatus[]> = {
-            open:     ['inReview', 'resolved', 'closed'],
+            open: ['inReview', 'resolved', 'closed'],
             inReview: ['open', 'resolved', 'closed'],
             resolved: ['open', 'closed'],
-            closed:   ['open'],
+            closed: ['open'],
         };
         if (!allowedTransitions[ticket.status]?.includes(status)) return false;
 
@@ -325,7 +325,10 @@ export default class TicketsDao {
             .sort((a, b) => b.resolved - a.resolved);
 
         const result: AnalyticsData = { overview, byCategory, byPriority, timelineDays, leaderboard };
-        this.analyticsCache.set(windowDays, { data: result, expiresAt: Date.now() + TicketsDao.ANALYTICS_CACHE_TTL_MS });
+        this.analyticsCache.set(windowDays, {
+            data: result,
+            expiresAt: Date.now() + TicketsDao.ANALYTICS_CACHE_TTL_MS,
+        });
         return result;
     }
 
@@ -384,4 +387,3 @@ export default class TicketsDao {
 
 // ── Backwards compat alias ──
 export { TicketsDao as ReportsDao };
-

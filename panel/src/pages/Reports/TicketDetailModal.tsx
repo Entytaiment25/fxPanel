@@ -89,7 +89,11 @@ export default function TicketDetailModal({
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
     const openPlayerModal = useOpenPlayerModal();
 
-    const detailApi = useBackendApi<ApiGetTicketDetailResp>({ method: 'GET', path: '/reports/detail', abortOnUnmount: true });
+    const detailApi = useBackendApi<ApiGetTicketDetailResp>({
+        method: 'GET',
+        path: '/reports/detail',
+        abortOnUnmount: true,
+    });
     const messageApi = useBackendApi<ApiTicketMessageResp>({ method: 'POST', path: '/reports/message' });
     const statusApi = useBackendApi<ApiTicketStatusResp>({ method: 'POST', path: '/reports/status' });
     const claimApi = useBackendApi<ApiTicketClaimResp>({ method: 'POST', path: '/reports/claim' });
@@ -118,7 +122,7 @@ export default function TicketDetailModal({
                 setLoading(false);
             },
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ticketId]);
 
     useEffect(() => {
@@ -215,327 +219,331 @@ export default function TicketDetailModal({
 
     const isResolved = ticket?.status === 'resolved' || ticket?.status === 'closed';
 
-    return <>
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <TicketIcon className="h-5 w-5" />
-                        Ticket {ticketId}
-                        {ticket && (
-                            <Badge variant={statusVariants[ticket.status]} className="ml-1">
-                                {statusLabels[ticket.status]}
-                            </Badge>
-                        )}
-                    </DialogTitle>
-                </DialogHeader>
-
-                {/* Action bar */}
-                {ticket && (
-                    <div className="flex items-center gap-2 border-b pb-3">
-                        {/* Claim */}
-                        <Button
-                            size="sm"
-                            variant={ticket.claimedBy ? 'default' : 'outline-solid'}
-                            onClick={handleClaim}
-                            disabled={claiming}
-                        >
-                            {claiming ? (
-                                <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                                <UserCheckIcon className="mr-1 h-3.5 w-3.5" />
+    return (
+        <>
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <TicketIcon className="h-5 w-5" />
+                            Ticket {ticketId}
+                            {ticket && (
+                                <Badge variant={statusVariants[ticket.status]} className="ml-1">
+                                    {statusLabels[ticket.status]}
+                                </Badge>
                             )}
-                            {ticket.claimedBy ? `Claimed by ${ticket.claimedBy}` : 'Claim'}
-                        </Button>
+                        </DialogTitle>
+                    </DialogHeader>
 
-                        {/* Status changer */}
-                        <Select
-                            value={ticket.status}
-                            onValueChange={(v) => handleStatusChange(v as TicketStatus)}
-                            disabled={changingStatus}
-                        >
-                            <SelectTrigger className="w-[140px]">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="open">Open</SelectItem>
-                                <SelectItem value="inReview">In Review</SelectItem>
-                                <SelectItem value="resolved">Resolved</SelectItem>
-                                <SelectItem value="closed">Closed</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        <div className="flex-1" />
-
-                        <Button size="sm" variant="ghost" onClick={copyTicketLink} title="Copy link">
-                            <CopyIcon className="h-3.5 w-3.5" />
-                        </Button>
-                    </div>
-                )}
-
-                {loading ? (
-                    <div className="flex justify-center py-8">
-                        <Loader2Icon className="text-muted-foreground h-6 w-6 animate-spin" />
-                    </div>
-                ) : !ticket ? (
-                    <p className="text-destructive py-8 text-center">Ticket not found.</p>
-                ) : (
-                    <Tabs defaultValue="conversation" className="flex min-h-0 flex-1 flex-col">
-                        <TabsList className="w-full">
-                            <TabsTrigger value="conversation" className="flex-1 gap-1">
-                                <MessageSquareIcon className="h-3.5 w-3.5" />
-                                Conversation
-                            </TabsTrigger>
-                            <TabsTrigger value="notes" className="flex-1 gap-1">
-                                <LockIcon className="h-3.5 w-3.5" />
-                                Staff Notes
-                                {ticket.staffNotes?.length > 0 && (
-                                    <Badge variant="secondary" className="ml-1 px-1 text-[10px]">
-                                        {ticket.staffNotes.length}
-                                    </Badge>
+                    {/* Action bar */}
+                    {ticket && (
+                        <div className="flex items-center gap-2 border-b pb-3">
+                            {/* Claim */}
+                            <Button
+                                size="sm"
+                                variant={ticket.claimedBy ? 'default' : 'outline-solid'}
+                                onClick={handleClaim}
+                                disabled={claiming}
+                            >
+                                {claiming ? (
+                                    <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                    <UserCheckIcon className="mr-1 h-3.5 w-3.5" />
                                 )}
-                            </TabsTrigger>
-                            <TabsTrigger value="logs" className="flex-1 gap-1">
-                                <ScrollTextIcon className="h-3.5 w-3.5" />
-                                Logs
-                            </TabsTrigger>
-                            <TabsTrigger value="info" className="flex-1 gap-1">
-                                <InfoIcon className="h-3.5 w-3.5" />
-                                Info
-                            </TabsTrigger>
-                        </TabsList>
+                                {ticket.claimedBy ? `Claimed by ${ticket.claimedBy}` : 'Claim'}
+                            </Button>
 
-                        {/* â”€â”€ Conversation â”€â”€ */}
-                        <TabsContent value="conversation" className="mt-0 flex min-h-0 flex-1 flex-col">
-                            <ScrollArea className="max-h-[380px] flex-1 px-1">
-                                <div className="space-y-2 py-2">
-                                    {/* Screenshot preview */}
-                                    {ticket.screenshotUrl && (
-                                        <div className="bg-muted/30 rounded-lg border p-2">
-                                            <p className="text-muted-foreground mb-1 text-xs">In-game Screenshot</p>
-                                            <img
-                                                src={ticket.screenshotUrl}
-                                                alt="ticket screenshot"
-                                                className="max-h-48 w-full cursor-zoom-in rounded object-contain"
-                                                onClick={() => setLightboxUrl(ticket.screenshotUrl!)}
-                                            />
-                                        </div>
+                            {/* Status changer */}
+                            <Select
+                                value={ticket.status}
+                                onValueChange={(v) => handleStatusChange(v as TicketStatus)}
+                                disabled={changingStatus}
+                            >
+                                <SelectTrigger className="w-[140px]">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="open">Open</SelectItem>
+                                    <SelectItem value="inReview">In Review</SelectItem>
+                                    <SelectItem value="resolved">Resolved</SelectItem>
+                                    <SelectItem value="closed">Closed</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <div className="flex-1" />
+
+                            <Button size="sm" variant="ghost" onClick={copyTicketLink} title="Copy link">
+                                <CopyIcon className="h-3.5 w-3.5" />
+                            </Button>
+                        </div>
+                    )}
+
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                            <Loader2Icon className="text-muted-foreground h-6 w-6 animate-spin" />
+                        </div>
+                    ) : !ticket ? (
+                        <p className="text-destructive py-8 text-center">Ticket not found.</p>
+                    ) : (
+                        <Tabs defaultValue="conversation" className="flex min-h-0 flex-1 flex-col">
+                            <TabsList className="w-full">
+                                <TabsTrigger value="conversation" className="flex-1 gap-1">
+                                    <MessageSquareIcon className="h-3.5 w-3.5" />
+                                    Conversation
+                                </TabsTrigger>
+                                <TabsTrigger value="notes" className="flex-1 gap-1">
+                                    <LockIcon className="h-3.5 w-3.5" />
+                                    Staff Notes
+                                    {ticket.staffNotes?.length > 0 && (
+                                        <Badge variant="secondary" className="ml-1 px-1 text-[10px]">
+                                            {ticket.staffNotes.length}
+                                        </Badge>
                                     )}
+                                </TabsTrigger>
+                                <TabsTrigger value="logs" className="flex-1 gap-1">
+                                    <ScrollTextIcon className="h-3.5 w-3.5" />
+                                    Logs
+                                </TabsTrigger>
+                                <TabsTrigger value="info" className="flex-1 gap-1">
+                                    <InfoIcon className="h-3.5 w-3.5" />
+                                    Info
+                                </TabsTrigger>
+                            </TabsList>
 
-                                    {/* Initial description */}
-                                    <MessageBubble
-                                        author={ticket.reporter.name}
-                                        authorType="player"
-                                        content={ticket.description}
-                                        ts={ticket.tsCreated}
-                                        formatDateTime={formatDateTime}
-                                        isInitial
-                                    />
+                            {/* â”€â”€ Conversation â”€â”€ */}
+                            <TabsContent value="conversation" className="mt-0 flex min-h-0 flex-1 flex-col">
+                                <ScrollArea className="max-h-[380px] flex-1 px-1">
+                                    <div className="space-y-2 py-2">
+                                        {/* Screenshot preview */}
+                                        {ticket.screenshotUrl && (
+                                            <div className="bg-muted/30 rounded-lg border p-2">
+                                                <p className="text-muted-foreground mb-1 text-xs">In-game Screenshot</p>
+                                                <img
+                                                    src={ticket.screenshotUrl}
+                                                    alt="ticket screenshot"
+                                                    className="max-h-48 w-full cursor-zoom-in rounded object-contain"
+                                                    onClick={() => setLightboxUrl(ticket.screenshotUrl!)}
+                                                />
+                                            </div>
+                                        )}
 
-                                    {/* Messages */}
-                                    {ticket.messages.map((msg) => (
+                                        {/* Initial description */}
                                         <MessageBubble
-                                            key={msg.id}
-                                            author={msg.author}
-                                            authorType={msg.authorType}
-                                            content={msg.content}
-                                            imageUrls={msg.imageUrls}
-                                            ts={msg.ts}
+                                            author={ticket.reporter.name}
+                                            authorType="player"
+                                            content={ticket.description}
+                                            ts={ticket.tsCreated}
                                             formatDateTime={formatDateTime}
-                                            onImageClick={setLightboxUrl}
+                                            isInitial
                                         />
-                                    ))}
 
-                                    {ticket.messages.length === 0 && (
-                                        <p className="text-muted-foreground py-4 text-center text-sm">
-                                            No replies yet.
-                                        </p>
-                                    )}
-                                </div>
-                            </ScrollArea>
+                                        {/* Messages */}
+                                        {ticket.messages.map((msg) => (
+                                            <MessageBubble
+                                                key={msg.id}
+                                                author={msg.author}
+                                                authorType={msg.authorType}
+                                                content={msg.content}
+                                                imageUrls={msg.imageUrls}
+                                                ts={msg.ts}
+                                                formatDateTime={formatDateTime}
+                                                onImageClick={setLightboxUrl}
+                                            />
+                                        ))}
 
-                            {/* Reply box */}
-                            {!isResolved && (
-                                <div className="space-y-2 border-t pt-3">
-                                    <div className="flex gap-2">
-                                        <Input
-                                            placeholder="Type a reply..."
-                                            value={messageText}
-                                            onChange={(e) => setMessageText(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                    e.preventDefault();
-                                                    handleSendMessage();
-                                                }
-                                            }}
-                                            maxLength={2048}
-                                        />
-                                        <Button
-                                            size="icon"
-                                            onClick={handleSendMessage}
-                                            disabled={sendingMessage || (!messageText.trim() && !imageUrlInput.trim())}
-                                        >
-                                            {sendingMessage ? (
-                                                <Loader2Icon className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                <SendIcon className="h-4 w-4" />
-                                            )}
-                                        </Button>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <ImageIcon className="text-muted-foreground h-3.5 w-3.5" />
-                                        <Input
-                                            placeholder="Image URL (optional)"
-                                            value={imageUrlInput}
-                                            onChange={(e) => setImageUrlInput(e.target.value)}
-                                            className="text-xs"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </TabsContent>
-
-                        {/* â”€â”€ Staff Notes â”€â”€ */}
-                        <TabsContent value="notes" className="mt-0 flex min-h-0 flex-1 flex-col">
-                            <ScrollArea className="max-h-[340px] flex-1 px-1">
-                                <div className="space-y-2 py-2">
-                                    {(ticket.staffNotes?.length ?? 0) === 0 && (
-                                        <p className="text-muted-foreground py-4 text-center text-sm">
-                                            No staff notes yet.
-                                        </p>
-                                    )}
-                                    {(ticket.staffNotes ?? []).map((note) => (
-                                        <StaffNoteCard
-                                            key={note.id}
-                                            note={note}
-                                            formatDateTime={formatDateTime}
-                                            onDelete={() => handleDeleteNote(note.id)}
-                                            deleting={deletingNoteId === note.id}
-                                        />
-                                    ))}
-                                </div>
-                            </ScrollArea>
-
-                            <div className="flex gap-2 border-t pt-3">
-                                <Textarea
-                                    placeholder="Add a private staff note..."
-                                    value={noteText}
-                                    onChange={(e) => setNoteText(e.target.value)}
-                                    rows={2}
-                                    maxLength={2048}
-                                    className="flex-1 resize-none text-sm"
-                                />
-                                <Button
-                                    size="icon"
-                                    onClick={handleAddNote}
-                                    disabled={addingNote || !noteText.trim()}
-                                    className="self-end"
-                                >
-                                    {addingNote ? (
-                                        <Loader2Icon className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <SendIcon className="h-4 w-4" />
-                                    )}
-                                </Button>
-                            </div>
-                        </TabsContent>
-
-                        {/* â”€â”€ Logs â”€â”€ */}
-                        <TabsContent value="logs" className="mt-0 min-h-0 flex-1">
-                            <ScrollArea className="max-h-[450px]">
-                                <div className="space-y-3 py-2">
-                                    {ticket.logContext.reporter.length > 0 && (
-                                        <LogSection title="Reporter Logs" entries={ticket.logContext.reporter} />
-                                    )}
-                                    {ticket.logContext.targets.length > 0 && (
-                                        <LogSection title="Target Logs" entries={ticket.logContext.targets} />
-                                    )}
-                                    {ticket.logContext.world.length > 0 && (
-                                        <LogSection title="World Events" entries={ticket.logContext.world} />
-                                    )}
-                                    {ticket.logContext.reporter.length === 0 &&
-                                        ticket.logContext.targets.length === 0 &&
-                                        ticket.logContext.world.length === 0 && (
+                                        {ticket.messages.length === 0 && (
                                             <p className="text-muted-foreground py-4 text-center text-sm">
-                                                No log context was captured.
+                                                No replies yet.
                                             </p>
                                         )}
-                                </div>
-                            </ScrollArea>
-                        </TabsContent>
+                                    </div>
+                                </ScrollArea>
 
-                        {/* â”€â”€ Info â”€â”€ */}
-                        <TabsContent value="info" className="mt-0">
-                            <div className="space-y-3 py-2">
-                                <InfoRow label="Category" value={ticket.category} />
-                                {ticket.priority && (
-                                    <InfoRow label="Priority" value={ticket.priority.toUpperCase()} />
-                                )}
-                                <InfoRow label="Status" value={statusLabels[ticket.status]} />
-                                <InfoRow label="Created" value={formatDateTime(ticket.tsCreated)} />
-                                <InfoRow label="Last Activity" value={formatDateTime(ticket.tsLastActivity)} />
-                                {ticket.tsResolved && (
-                                    <InfoRow label="Resolved" value={formatDateTime(ticket.tsResolved)} />
-                                )}
-                                {ticket.resolvedBy && <InfoRow label="Resolved By" value={ticket.resolvedBy} />}
-                                {ticket.claimedBy && <InfoRow label="Claimed By" value={ticket.claimedBy} />}
-                                {ticket.feedback && (
-                                    <InfoRow
-                                        label="Feedback"
-                                        value={`${'â˜…'.repeat(ticket.feedback.rating)}${'â˜†'.repeat(5 - ticket.feedback.rating)}${ticket.feedback.comment ? ` â€” ${ticket.feedback.comment}` : ''}`}
-                                    />
-                                )}
-
-                                <div className="pt-2">
-                                    <h4 className="mb-2 text-sm font-medium">Reporter</h4>
-                                    <button
-                                        className="text-primary cursor-pointer text-sm hover:underline"
-                                        onClick={() => handlePlayerClick(ticket.reporter.license)}
-                                    >
-                                        {ticket.reporter.name}
-                                        {ticket.reporter.netid && ` (#${ticket.reporter.netid})`}
-                                    </button>
-                                </div>
-
-                                {ticket.targets.length > 0 && (
-                                    <div className="pt-1">
-                                        <h4 className="mb-2 text-sm font-medium">Target(s)</h4>
-                                        <div className="space-y-1">
-                                            {ticket.targets.map((t, i) => (
-                                                <button
-                                                    key={i}
-                                                    className="text-primary block cursor-pointer text-sm hover:underline"
-                                                    onClick={() => handlePlayerClick(t.license)}
-                                                >
-                                                    {t.name}
-                                                    {t.netid && ` (#${t.netid})`}
-                                                </button>
-                                            ))}
+                                {/* Reply box */}
+                                {!isResolved && (
+                                    <div className="space-y-2 border-t pt-3">
+                                        <div className="flex gap-2">
+                                            <Input
+                                                placeholder="Type a reply..."
+                                                value={messageText}
+                                                onChange={(e) => setMessageText(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                        e.preventDefault();
+                                                        handleSendMessage();
+                                                    }
+                                                }}
+                                                maxLength={2048}
+                                            />
+                                            <Button
+                                                size="icon"
+                                                onClick={handleSendMessage}
+                                                disabled={
+                                                    sendingMessage || (!messageText.trim() && !imageUrlInput.trim())
+                                                }
+                                            >
+                                                {sendingMessage ? (
+                                                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <SendIcon className="h-4 w-4" />
+                                                )}
+                                            </Button>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <ImageIcon className="text-muted-foreground h-3.5 w-3.5" />
+                                            <Input
+                                                placeholder="Image URL (optional)"
+                                                value={imageUrlInput}
+                                                onChange={(e) => setImageUrlInput(e.target.value)}
+                                                className="text-xs"
+                                            />
                                         </div>
                                     </div>
                                 )}
-                            </div>
-                        </TabsContent>
-                    </Tabs>
-                )}
-            </DialogContent>
-        </Dialog>
+                            </TabsContent>
 
-        {/* Lightbox */}
-        {lightboxUrl && (
-            <Dialog open onOpenChange={() => setLightboxUrl(null)}>
-                <DialogContent className="flex max-h-[95vh] max-w-5xl items-center justify-center bg-black/90 p-2">
-                    <img
-                        src={lightboxUrl}
-                        alt="enlarged attachment"
-                        referrerPolicy="no-referrer"
-                        className="max-h-[90vh] max-w-full rounded object-contain"
-                        onError={() => setLightboxUrl(null)}
-                    />
+                            {/* â”€â”€ Staff Notes â”€â”€ */}
+                            <TabsContent value="notes" className="mt-0 flex min-h-0 flex-1 flex-col">
+                                <ScrollArea className="max-h-[340px] flex-1 px-1">
+                                    <div className="space-y-2 py-2">
+                                        {(ticket.staffNotes?.length ?? 0) === 0 && (
+                                            <p className="text-muted-foreground py-4 text-center text-sm">
+                                                No staff notes yet.
+                                            </p>
+                                        )}
+                                        {(ticket.staffNotes ?? []).map((note) => (
+                                            <StaffNoteCard
+                                                key={note.id}
+                                                note={note}
+                                                formatDateTime={formatDateTime}
+                                                onDelete={() => handleDeleteNote(note.id)}
+                                                deleting={deletingNoteId === note.id}
+                                            />
+                                        ))}
+                                    </div>
+                                </ScrollArea>
+
+                                <div className="flex gap-2 border-t pt-3">
+                                    <Textarea
+                                        placeholder="Add a private staff note..."
+                                        value={noteText}
+                                        onChange={(e) => setNoteText(e.target.value)}
+                                        rows={2}
+                                        maxLength={2048}
+                                        className="flex-1 resize-none text-sm"
+                                    />
+                                    <Button
+                                        size="icon"
+                                        onClick={handleAddNote}
+                                        disabled={addingNote || !noteText.trim()}
+                                        className="self-end"
+                                    >
+                                        {addingNote ? (
+                                            <Loader2Icon className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <SendIcon className="h-4 w-4" />
+                                        )}
+                                    </Button>
+                                </div>
+                            </TabsContent>
+
+                            {/* â”€â”€ Logs â”€â”€ */}
+                            <TabsContent value="logs" className="mt-0 min-h-0 flex-1">
+                                <ScrollArea className="max-h-[450px]">
+                                    <div className="space-y-3 py-2">
+                                        {ticket.logContext.reporter.length > 0 && (
+                                            <LogSection title="Reporter Logs" entries={ticket.logContext.reporter} />
+                                        )}
+                                        {ticket.logContext.targets.length > 0 && (
+                                            <LogSection title="Target Logs" entries={ticket.logContext.targets} />
+                                        )}
+                                        {ticket.logContext.world.length > 0 && (
+                                            <LogSection title="World Events" entries={ticket.logContext.world} />
+                                        )}
+                                        {ticket.logContext.reporter.length === 0 &&
+                                            ticket.logContext.targets.length === 0 &&
+                                            ticket.logContext.world.length === 0 && (
+                                                <p className="text-muted-foreground py-4 text-center text-sm">
+                                                    No log context was captured.
+                                                </p>
+                                            )}
+                                    </div>
+                                </ScrollArea>
+                            </TabsContent>
+
+                            {/* â”€â”€ Info â”€â”€ */}
+                            <TabsContent value="info" className="mt-0">
+                                <div className="space-y-3 py-2">
+                                    <InfoRow label="Category" value={ticket.category} />
+                                    {ticket.priority && (
+                                        <InfoRow label="Priority" value={ticket.priority.toUpperCase()} />
+                                    )}
+                                    <InfoRow label="Status" value={statusLabels[ticket.status]} />
+                                    <InfoRow label="Created" value={formatDateTime(ticket.tsCreated)} />
+                                    <InfoRow label="Last Activity" value={formatDateTime(ticket.tsLastActivity)} />
+                                    {ticket.tsResolved && (
+                                        <InfoRow label="Resolved" value={formatDateTime(ticket.tsResolved)} />
+                                    )}
+                                    {ticket.resolvedBy && <InfoRow label="Resolved By" value={ticket.resolvedBy} />}
+                                    {ticket.claimedBy && <InfoRow label="Claimed By" value={ticket.claimedBy} />}
+                                    {ticket.feedback && (
+                                        <InfoRow
+                                            label="Feedback"
+                                            value={`${'â˜…'.repeat(ticket.feedback.rating)}${'â˜†'.repeat(5 - ticket.feedback.rating)}${ticket.feedback.comment ? ` â€” ${ticket.feedback.comment}` : ''}`}
+                                        />
+                                    )}
+
+                                    <div className="pt-2">
+                                        <h4 className="mb-2 text-sm font-medium">Reporter</h4>
+                                        <button
+                                            className="text-primary cursor-pointer text-sm hover:underline"
+                                            onClick={() => handlePlayerClick(ticket.reporter.license)}
+                                        >
+                                            {ticket.reporter.name}
+                                            {ticket.reporter.netid && ` (#${ticket.reporter.netid})`}
+                                        </button>
+                                    </div>
+
+                                    {ticket.targets.length > 0 && (
+                                        <div className="pt-1">
+                                            <h4 className="mb-2 text-sm font-medium">Target(s)</h4>
+                                            <div className="space-y-1">
+                                                {ticket.targets.map((t, i) => (
+                                                    <button
+                                                        key={i}
+                                                        className="text-primary block cursor-pointer text-sm hover:underline"
+                                                        onClick={() => handlePlayerClick(t.license)}
+                                                    >
+                                                        {t.name}
+                                                        {t.netid && ` (#${t.netid})`}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </TabsContent>
+                        </Tabs>
+                    )}
                 </DialogContent>
             </Dialog>
-        )}
-    </>;
+
+            {/* Lightbox */}
+            {lightboxUrl && (
+                <Dialog open onOpenChange={() => setLightboxUrl(null)}>
+                    <DialogContent className="flex max-h-[95vh] max-w-5xl items-center justify-center bg-black/90 p-2">
+                        <img
+                            src={lightboxUrl}
+                            alt="enlarged attachment"
+                            referrerPolicy="no-referrer"
+                            className="max-h-[90vh] max-w-full rounded object-contain"
+                            onError={() => setLightboxUrl(null)}
+                        />
+                    </DialogContent>
+                </Dialog>
+            )}
+        </>
+    );
 }
 
 // â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -562,9 +570,7 @@ function MessageBubble({
     return (
         <div
             className={`rounded-lg p-3 ${
-                authorType === 'admin'
-                    ? 'bg-primary/10 border-primary/20 ml-4 border'
-                    : 'bg-muted/50 mr-4'
+                authorType === 'admin' ? 'bg-primary/10 border-primary/20 ml-4 border' : 'bg-muted/50 mr-4'
             } ${isInitial ? 'border-2' : ''}`}
         >
             <div className="mb-1 flex items-center gap-2">
@@ -574,9 +580,7 @@ function MessageBubble({
                 </Badge>
                 <span className="text-muted-foreground text-xs">{formatDateTime(ts)}</span>
             </div>
-            {content && content.trim().length > 0 && (
-                <p className="text-sm whitespace-pre-wrap">{content}</p>
-            )}
+            {content && content.trim().length > 0 && <p className="text-sm whitespace-pre-wrap">{content}</p>}
             {imageUrls && imageUrls.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                     {imageUrls.filter(isAllowedImageUrl).map((url, i) => (
@@ -587,7 +591,9 @@ function MessageBubble({
                             referrerPolicy="no-referrer"
                             className="max-h-32 cursor-zoom-in rounded border object-contain"
                             onClick={() => onImageClick?.(url)}
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                            }}
                         />
                     ))}
                 </div>
@@ -608,7 +614,7 @@ function StaffNoteCard({
     deleting: boolean;
 }) {
     return (
-        <div className="bg-yellow-500/5 border-yellow-500/20 rounded-lg border p-3">
+        <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-3">
             <div className="mb-1 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <LockIcon className="h-3 w-3 text-yellow-500" />
@@ -649,9 +655,7 @@ function LogSection({ title, entries }: { title: string; entries: TicketLogEntry
                         <div key={i} className="flex gap-2 font-mono text-xs">
                             <span className="text-muted-foreground shrink-0">{time}</span>
                             <span className="text-muted-foreground shrink-0">[{entry.type}]</span>
-                            {entry.src.name && (
-                                <span className="text-foreground/70 shrink-0">{entry.src.name}</span>
-                            )}
+                            {entry.src.name && <span className="text-foreground/70 shrink-0">{entry.src.name}</span>}
                             <span className="truncate">{entry.msg}</span>
                         </div>
                     );

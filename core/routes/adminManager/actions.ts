@@ -1,6 +1,6 @@
 const modulename = 'WebServer:AdminManagerActions';
 import { customAlphabet } from 'nanoid';
-import dict49 from 'nanoid-dictionary/nolookalikes';
+import { nolookalikes } from 'nanoid-dictionary';
 import got from '@lib/got';
 import consts from '@shared/consts';
 import consoleFactory from '@lib/console';
@@ -8,7 +8,7 @@ import { AuthedCtx } from '@modules/WebServer/ctxTypes';
 const console = consoleFactory(modulename);
 
 //Helpers
-const nanoid = customAlphabet(dict49, 20);
+const nanoid = customAlphabet(nolookalikes, 20);
 //NOTE: this desc misses that it should start and end with alphanum or _, and cannot have repeated -_.
 const nameRegexDesc = 'up to 20 characters containing only letters, numbers and the characters \`_.-\`';
 const cfxHttpReqOptions = {
@@ -120,7 +120,10 @@ async function handleAdd(ctx: AuthedCtx) {
             }
         } catch (error) {
             console.error(`Failed to resolve CitizenFX ID to game identifier with error: ${emsg(error)}`);
-            return ctx.send({ type: 'danger', message: 'Failed to verify CitizenFX ID. Please try again or check the ID.' });
+            return ctx.send({
+                type: 'danger',
+                message: 'Failed to verify CitizenFX ID. Please try again or check the ID.',
+            });
         }
     }
 
@@ -230,7 +233,10 @@ async function handleEdit(ctx: AuthedCtx) {
             }
         } catch (error) {
             console.error(`Failed to resolve CitizenFX ID to game identifier with error: ${emsg(error)}`);
-            return ctx.send({ type: 'danger', message: 'Failed to verify CitizenFX ID. Please try again or check the ID.' });
+            return ctx.send({
+                type: 'danger',
+                message: 'Failed to verify CitizenFX ID. Please try again or check the ID.',
+            });
         }
     }
 

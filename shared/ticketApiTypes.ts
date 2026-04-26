@@ -76,13 +76,13 @@ export type TicketLogContext = {
 
 // ── Core DB record ──
 export type DatabaseTicketType = {
-    id: string;                          // format: TKT-XXXXX
+    id: string; // format: TKT-XXXXX
     status: TicketStatus;
-    category: string;                    // free-form, from config's ticketCategories
-    priority?: TicketPriority;           // undefined when priority is disabled in config
+    category: string; // free-form, from config's ticketCategories
+    priority?: TicketPriority; // undefined when priority is disabled in config
     reporter: TicketPlayerRef;
     targets: TicketPlayerRef[];
-    description: string;                 // replaces 'reason'
+    description: string; // replaces 'reason'
     screenshotUrl?: string;
     messages: TicketMessage[];
     staffNotes: StaffNote[];
@@ -119,12 +119,14 @@ export type ApiGetTicketListResp = { tickets: TicketListItem[] } | { error: stri
 export type ApiGetTicketDetailResp = { ticket: DatabaseTicketType } | { error: string };
 
 // GET /reports/config
-export type ApiGetTicketConfigResp = {
-    categories: string[];
-    categoryDescriptions: Record<string, string>;
-    priorityEnabled: boolean;
-    feedbackEnabled: boolean;
-} | { error: string };
+export type ApiGetTicketConfigResp =
+    | {
+          categories: string[];
+          categoryDescriptions: Record<string, string>;
+          priorityEnabled: boolean;
+          feedbackEnabled: boolean;
+      }
+    | { error: string };
 
 // POST /reports/message
 export type ApiTicketMessageReq = {
@@ -146,25 +148,27 @@ export type ApiTicketStatusResp = { success: true } | { error: string };
 // POST /reports/claim
 export type ApiTicketClaimReq = { id: string };
 export type ApiTicketClaimResp =
-    | { success: true; claimedBy: string }   // claim succeeded
-    | { success: true; claimedBy: null }     // unclaim succeeded
+    | { success: true; claimedBy: string } // claim succeeded
+    | { success: true; claimedBy: null } // unclaim succeeded
     | { error: string };
 
 // GET /reports/analytics
-export type ApiGetAnalyticsResp = {
-    overview: {
-        total: number;
-        open: number;
-        inReview: number;
-        resolved: number;
-        closed: number;
-        avgResolutionMs: number;
-    };
-    byCategory: { category: string; count: number }[];
-    byPriority: { priority: TicketPriority; count: number }[];
-    timelineDays: { date: string; created: number; resolved: number }[];
-    leaderboard: { adminName: string; resolved: number; avgResolutionMs: number }[];
-} | { error: string };
+export type ApiGetAnalyticsResp =
+    | {
+          overview: {
+              total: number;
+              open: number;
+              inReview: number;
+              resolved: number;
+              closed: number;
+              avgResolutionMs: number;
+          };
+          byCategory: { category: string; count: number }[];
+          byPriority: { priority: TicketPriority; count: number }[];
+          timelineDays: { date: string; created: number; resolved: number }[];
+          leaderboard: { adminName: string; resolved: number; avgResolutionMs: number }[];
+      }
+    | { error: string };
 
 // ── NUI-facing intercom types (player) ──
 

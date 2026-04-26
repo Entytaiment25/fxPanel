@@ -1,17 +1,14 @@
 const modulename = 'AddonProcess';
 import { fork, ChildProcess } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import consoleFactory from '@lib/console';
+import { txEnv } from '@core/globalData';
 import { AddonStorageScope } from './addonStorage';
 import { isPathInside } from './addonUtils';
 import { ServerPlayer } from '@lib/player/playerClasses';
-import type {
-    AddonState,
-    AddonRouteDescriptor,
-    CoreToAddonMessage,
-    AddonToCoreMessage,
-} from '@shared/addonTypes';
+import type { AddonState, AddonRouteDescriptor, CoreToAddonMessage, AddonToCoreMessage } from '@shared/addonTypes';
 const console = consoleFactory(modulename);
 
 const IPC_TIMEOUT_MS = 30_000;
@@ -95,29 +92,40 @@ export default class AddonProcess {
         }
 
         try {
-            // The addon-sdk lives at <txaPath>/node_modules/addon-sdk/
-            // ESM resolution walks up the directory tree to find node_modules,
-            // so addons at <txaPath>/addons/<id>/ naturally resolve it.
-            //
-            // Do NOT inherit the parent's execArgv (which may contain debug/inspect
-            // flags that would expose the host Node process to the addon), and
-            // explicitly neutralise a few foot-guns.
-            //
-            // Inside FXServer's embedded Node runtime, process.execPath points to
-            // FXServer.exe rather than node. Using it as the fork executable would
-            // spawn a full FXServer instance instead of a plain Node process, causing
-            // a duplicate-core boot and config-lock conflict. Detect this and fall
-            // back to the system Node.js binary.
-            const isFxServerRuntime = /FXServer/i.test(path.basename(process.execPath));
-            // Whitelist of additional process.env keys to forward to addon child processes.
-            // These are safe locale/timezone/terminal vars that addons may legitimately need.
+            // In FXServer runtimes, process.execPath may point to FXServer or even
+            // the musl loader on Alpine instead of an actual node binary. Resolve a
+            // known-good node executable deterministically before forking addons.
+            const resolveAddonNodeExec = () => {
+                const ext = process.platform === 'win32' ? '.exe' : '';
+                const currentBase = path.basename(process.execPath).toLowerCase();
+                if ((currentBase === `node${ext}` || currentBase === 'node') && fs.existsSync(process.execPath)) {
+                    return process.execPath;
+                }
+
+                const candidateRoots = [
+                    path.dirname(process.execPath),
+                    path.resolve(txEnv.fxsPath, '..'),
+                    path.resolve(txEnv.fxsPath, '../..'),
+                    path.resolve(txEnv.fxsPath, '../../..'),
+                ];
+                for (const root of candidateRoots) {
+                    const candidate = path.join(root, `node${ext}`);
+                    if (fs.existsSync(candidate)) {
+                        return candidate;
+                    }
+                }
+
+                return 'node';
+            };
+
             const envWhitelist = ['LANG', 'LC_ALL', 'LC_CTYPE', 'TZ', 'TERM'] as const;
             const whitelistedEnv = Object.fromEntries(
                 envWhitelist.flatMap((key) => (process.env[key] !== undefined ? [[key, process.env[key]]] : [])),
             );
+
             this.child = fork(resolvedEntry, [], {
                 cwd: this.addonDir,
-                ...(isFxServerRuntime && { execPath: 'node' }),
+                execPath: resolveAddonNodeExec(),
                 env: {
                     ...whitelistedEnv,
                     PATH: process.env.PATH,
@@ -134,7 +142,6 @@ export default class AddonProcess {
                 serialization: 'json',
             });
 
-            // Capture stdout/stderr
             this.child.stdout?.on('data', (data: Buffer) => {
                 console.log(`${this.logPrefix} ${data.toString().trimEnd()}`);
             });
@@ -142,12 +149,10 @@ export default class AddonProcess {
                 console.error(`${this.logPrefix} ${data.toString().trimEnd()}`);
             });
 
-            // Handle IPC messages
             this.child.on('message', (msg: AddonToCoreMessage) => {
                 this.handleMessage(msg);
             });
 
-            // Handle unexpected exits
             this.child.on('exit', (code, signal) => {
                 if (this.state === 'running') {
                     console.error(`${this.logPrefix} Process crashed (code=${code}, signal=${signal})`);
@@ -168,7 +173,6 @@ export default class AddonProcess {
                 }
             });
 
-            // Send init message
             this.send({
                 type: 'init',
                 payload: {
@@ -177,7 +181,6 @@ export default class AddonProcess {
                 },
             });
 
-            // Wait for ready signal
             const readyResult = await this.waitForReady(timeoutMs);
             if (!readyResult.success) {
                 await this.kill();
@@ -231,7 +234,7 @@ export default class AddonProcess {
         path: string;
         headers: Record<string, string>;
         body: unknown;
-        admin: { name: string; permissions: string[] };
+        admin: { name: string; permissions: string[]; isMaster?: boolean };
     }): Promise<{ status: number; headers?: Record<string, string>; body: unknown }> {
         if (this.state !== 'running') {
             return { status: 503, body: { error: 'Addon is not running' } };
@@ -379,11 +382,14 @@ export default class AddonProcess {
                 break;
             }
             case 'storage-request': {
-                this.handleStorageRequest(msg.id, msg.payload as {
-                    op: 'get' | 'set' | 'delete' | 'list';
-                    key?: string;
-                    value?: unknown;
-                });
+                this.handleStorageRequest(
+                    msg.id,
+                    msg.payload as {
+                        op: 'get' | 'set' | 'delete' | 'list';
+                        key?: string;
+                        value?: unknown;
+                    },
+                );
                 break;
             }
             case 'ws-push': {
@@ -404,10 +410,7 @@ export default class AddonProcess {
                 break;
             }
             case 'api-call': {
-                this.handleApiCall(
-                    msg.id,
-                    msg.payload as { method: string; args: unknown[] },
-                );
+                this.handleApiCall(msg.id, msg.payload as { method: string; args: unknown[] });
                 break;
             }
             case 'error': {
@@ -491,14 +494,22 @@ export default class AddonProcess {
             switch (payload.op) {
                 case 'get':
                     if (!payload.key) {
-                        this.send({ type: 'storage-response', id, payload: { data: null, error: 'Missing key for get operation' } });
+                        this.send({
+                            type: 'storage-response',
+                            id,
+                            payload: { data: null, error: 'Missing key for get operation' },
+                        });
                         return;
                     }
                     result = this.storage.get(payload.key);
                     break;
                 case 'set': {
                     if (!payload.key) {
-                        this.send({ type: 'storage-response', id, payload: { data: null, error: 'Missing key for set operation' } });
+                        this.send({
+                            type: 'storage-response',
+                            id,
+                            payload: { data: null, error: 'Missing key for set operation' },
+                        });
                         return;
                     }
                     const setResult = this.storage.set(payload.key, payload.value);
@@ -511,7 +522,11 @@ export default class AddonProcess {
                 }
                 case 'delete':
                     if (!payload.key) {
-                        this.send({ type: 'storage-response', id, payload: { data: null, error: 'Missing key for delete operation' } });
+                        this.send({
+                            type: 'storage-response',
+                            id,
+                            payload: { data: null, error: 'Missing key for delete operation' },
+                        });
                         return;
                     }
                     this.storage.delete(payload.key);

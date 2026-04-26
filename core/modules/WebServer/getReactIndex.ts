@@ -98,7 +98,9 @@ export const tmpCustomThemes: ThemeType[] = [
  * views without their JS needing to run and without <link> tags (which would
  * fail the webAuthMw check on unauthenticated pages).
  */
-async function getAddonThemeInjection(nonce: string): Promise<{ styleTags: string[]; htmlAttrs: string; logoDataUrl: string | undefined }> {
+async function getAddonThemeInjection(
+    nonce: string,
+): Promise<{ styleTags: string[]; htmlAttrs: string; logoDataUrl: string | undefined }> {
     const empty = { styleTags: [], htmlAttrs: '', logoDataUrl: undefined };
     try {
         const allAddons = txCore.addonManager.getAllAddons();
@@ -138,8 +140,10 @@ async function getAddonThemeInjection(nonce: string): Promise<{ styleTags: strin
                     const normalizedCss = path.resolve(cssPath);
                     const normalizedDir = path.resolve(addon.dir);
                     if (isPathInside(normalizedDir, normalizedCss)) {
-                        const cssContent = (await fsp.readFile(normalizedCss, 'utf-8'))
-                            .replace(/<\/style/gi, '<\\/style');
+                        const cssContent = (await fsp.readFile(normalizedCss, 'utf-8')).replace(
+                            /<\/style/gi,
+                            '<\\/style',
+                        );
                         styleTags.push(`<style${nonce} data-addon-id="${addon.manifest.id}">${cssContent}</style>`);
                     }
                 } catch {
@@ -162,19 +166,27 @@ async function getAddonThemeInjection(nonce: string): Promise<{ styleTags: strin
             }
 
             if (cssDeclarations.length > 0) {
-                styleTags.push(`<style${nonce}>html[data-addon-themer-enabled='true'] {\n            ${cssDeclarations.join('\n            ')}\n        }</style>`);
+                styleTags.push(
+                    `<style${nonce}>html[data-addon-themer-enabled='true'] {\n            ${cssDeclarations.join('\n            ')}\n        }</style>`,
+                );
             }
 
             // 3. Resolve the panel logo as a data: URI so it works without auth
             let logoDataUrl: string | undefined;
             const logoFilename = config.branding?.panelLogo;
             if (typeof logoFilename === 'string' && logoFilename.trim()) {
-                const logoPath = txCore.addonManager.resolveAddonStaticPath(addon.manifest.id, 'static', logoFilename.trim());
+                const logoPath = txCore.addonManager.resolveAddonStaticPath(
+                    addon.manifest.id,
+                    'static',
+                    logoFilename.trim(),
+                );
                 if (logoPath) {
                     try {
                         const logoStat = await fsp.stat(logoPath);
                         if (logoStat.size > MAX_LOGO_BYTES) {
-                            console.warn(`Panel logo "${logoFilename}" is ${logoStat.size} bytes (max ${MAX_LOGO_BYTES}); skipping inline.`);
+                            console.warn(
+                                `Panel logo "${logoFilename}" is ${logoStat.size} bytes (max ${MAX_LOGO_BYTES}); skipping inline.`,
+                            );
                         } else {
                             const logoBytes = await fsp.readFile(logoPath);
                             const ext = path.extname(logoFilename).toLowerCase();
@@ -189,12 +201,16 @@ async function getAddonThemeInjection(nonce: string): Promise<{ styleTags: strin
                             };
                             const mime = mimeMap[ext];
                             if (!mime) {
-                                console.warn(`Panel logo "${logoFilename}" has unsupported extension "${ext}"; skipping inline.`);
+                                console.warn(
+                                    `Panel logo "${logoFilename}" has unsupported extension "${ext}"; skipping inline.`,
+                                );
                             } else {
                                 logoDataUrl = `data:${mime};base64,${logoBytes.toString('base64')}`;
                             }
                         }
-                    } catch { /* logo file unreadable */ }
+                    } catch {
+                        /* logo file unreadable */
+                    }
                 }
             }
 

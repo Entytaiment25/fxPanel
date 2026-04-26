@@ -27,10 +27,11 @@ function DashboardHeaderStats() {
 
     const isRunning = status.runner.isChildAlive;
     const isHealthy = status.server.health === FxMonitorHealth.ONLINE;
-    const uptimeStr = msToShortDuration(status.server.uptime, {
-        units: ['d', 'h', 'm'],
-        delimiter: ' ',
-    }) || '--';
+    const uptimeStr =
+        msToShortDuration(status.server.uptime, {
+            units: ['d', 'h', 'm'],
+            delimiter: ' ',
+        }) || '--';
 
     return (
         <>
@@ -40,14 +41,18 @@ function DashboardHeaderStats() {
                     isRunning && isHealthy
                         ? 'border-success/30 bg-success/10 text-success-inline'
                         : isRunning
-                            ? 'border-warning/30 bg-warning/10 text-warning-inline'
-                            : 'border-destructive/30 bg-destructive/10 text-destructive-inline',
+                          ? 'border-warning/30 bg-warning/10 text-warning-inline'
+                          : 'border-destructive/30 bg-destructive/10 text-destructive-inline',
                 )}
             >
                 <span
                     className={cn(
                         'h-1.5 w-1.5 rounded-full',
-                        isRunning && isHealthy ? 'bg-success animate-pulse' : isRunning ? 'bg-warning' : 'bg-destructive',
+                        isRunning && isHealthy
+                            ? 'bg-success animate-pulse'
+                            : isRunning
+                              ? 'bg-warning'
+                              : 'bg-destructive',
                     )}
                 />
                 {isRunning ? (isHealthy ? 'Online' : 'Degraded') : 'Offline'}
@@ -130,8 +135,23 @@ function DashboardPageInner() {
             {dashboardWidgets.length > 0 && (
                 <div className="flex w-full flex-col gap-4 lg:flex-row lg:flex-wrap">
                     {dashboardWidgets.map((w) => (
-                        <ErrorBoundary key={`${w.addonId}-${w.title}`} fallback={<div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">Addon widget error: {w.title}</div>}>
-                            <div className={w.defaultSize === 'full' ? 'w-full' : w.defaultSize === 'quarter' ? 'min-w-0 flex-1' : 'min-w-0 flex-1 lg:flex-[2]'}>
+                        <ErrorBoundary
+                            key={`${w.addonId}-${w.title}`}
+                            fallback={
+                                <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border p-4 text-sm">
+                                    Addon widget error: {w.title}
+                                </div>
+                            }
+                        >
+                            <div
+                                className={
+                                    w.defaultSize === 'full'
+                                        ? 'w-full'
+                                        : w.defaultSize === 'quarter'
+                                          ? 'min-w-0 flex-1'
+                                          : 'min-w-0 flex-1 lg:flex-[2]'
+                                }
+                            >
                                 <w.Component />
                             </div>
                         </ErrorBoundary>
@@ -141,7 +161,14 @@ function DashboardPageInner() {
             {sidebarWidgets.length > 0 && (
                 <div className="flex w-full flex-col gap-4 lg:flex-row lg:flex-wrap">
                     {sidebarWidgets.map((w) => (
-                        <ErrorBoundary key={`${w.addonId}-${w.title}`} fallback={<div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">Addon widget error: {w.title}</div>}>
+                        <ErrorBoundary
+                            key={`${w.addonId}-${w.title}`}
+                            fallback={
+                                <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border p-4 text-sm">
+                                    Addon widget error: {w.title}
+                                </div>
+                            }
+                        >
                             <w.Component />
                         </ErrorBoundary>
                     ))}

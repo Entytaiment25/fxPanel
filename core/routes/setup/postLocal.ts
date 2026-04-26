@@ -14,9 +14,9 @@ const console = consoleFactory(modulename);
  */
 export async function handleSaveLocal(ctx: AuthedCtx) {
     if (
-        ctx.request.body.name === undefined ||
-        ctx.request.body.dataFolder === undefined ||
-        ctx.request.body.cfgFile === undefined
+        typeof ctx.request.body.name !== 'string' ||
+        typeof ctx.request.body.dataFolder !== 'string' ||
+        typeof ctx.request.body.cfgFile !== 'string'
     ) {
         return ctx.utils.error(400, 'Invalid Request - missing parameters');
     }

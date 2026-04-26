@@ -68,7 +68,11 @@ const validPending2faSessSchema = z.object({
 });
 export type Pending2faSessAuthType = z.infer<typeof validPending2faSessSchema>;
 
-const validSessAuthSchema = z.discriminatedUnion('type', [validPassSessAuthSchema, validCfxreSessAuthSchema, validDiscordSessAuthSchema]);
+const validSessAuthSchema = z.discriminatedUnion('type', [
+    validPassSessAuthSchema,
+    validCfxreSessAuthSchema,
+    validDiscordSessAuthSchema,
+]);
 
 /**
  * Autentication logic used in both websocket and webserver, for both web and nui requests.

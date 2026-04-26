@@ -30,9 +30,7 @@ const MenuRoot: React.FC = () => {
                 </HelpTooltip>
             </Box>
             <PlayersPage visible={curPage === txAdminMenuPage.Players} />
-            {serverCtx.reportsEnabled && (
-                <ReportsTab visible={curPage === txAdminMenuPage.Reports} />
-            )}
+            {serverCtx.reportsEnabled && <ReportsTab visible={curPage === txAdminMenuPage.Reports} />}
         </>
     );
 };

@@ -7,19 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/page-header';
-import {
-    FlagIcon,
-    Loader2Icon,
-    SearchIcon,
-    BarChart2Icon,
-    UserCheckIcon,
-} from 'lucide-react';
-import type {
-    ApiGetTicketListResp,
-    TicketListItem,
-    TicketStatus,
-    TicketPriority,
-} from '@shared/ticketApiTypes';
+import { FlagIcon, Loader2Icon, SearchIcon, BarChart2Icon, UserCheckIcon } from 'lucide-react';
+import type { ApiGetTicketListResp, TicketListItem, TicketStatus, TicketPriority } from '@shared/ticketApiTypes';
 import TicketDetailModal from './TicketDetailModal';
 import { navigate } from 'wouter/use-browser-location';
 
@@ -114,17 +103,9 @@ export default function ReportsPage() {
         <div className="h-contentvh flex w-full flex-col">
             <PageHeader icon={<FlagIcon className="size-5" />} title="Reports">
                 <div className="flex items-center gap-2">
-                    {openCount > 0 && (
-                        <Badge variant="destructive">{openCount} open</Badge>
-                    )}
-                    {inReviewCount > 0 && (
-                        <Badge variant="default">{inReviewCount} in review</Badge>
-                    )}
-                    <Button
-                        variant="outline-solid"
-                        size="sm"
-                        onClick={() => navigate('/reports/analytics')}
-                    >
+                    {openCount > 0 && <Badge variant="destructive">{openCount} open</Badge>}
+                    {inReviewCount > 0 && <Badge variant="default">{inReviewCount} in review</Badge>}
+                    <Button variant="outline-solid" size="sm" onClick={() => navigate('/reports/analytics')}>
                         <BarChart2Icon className="mr-1 h-4 w-4" /> Analytics
                     </Button>
                     <Button
@@ -138,9 +119,9 @@ export default function ReportsPage() {
                 </div>
             </PageHeader>
 
-            <div className="bg-card flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-border/60 shadow-sm">
+            <div className="bg-card border-border/60 flex w-full flex-1 flex-col overflow-hidden rounded-xl border shadow-sm">
                 {/* Filters */}
-                <div className="shrink-0 flex flex-wrap gap-2 border-b border-border/40 p-3">
+                <div className="border-border/40 flex shrink-0 flex-wrap gap-2 border-b p-3">
                     <div className="relative min-w-[180px] flex-1">
                         <SearchIcon className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                         <Input
@@ -170,7 +151,9 @@ export default function ReportsPage() {
                             <SelectContent>
                                 <SelectItem value="all">All Categories</SelectItem>
                                 {knownCategories.map((cat) => (
-                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    <SelectItem key={cat} value={cat}>
+                                        {cat}
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -244,7 +227,7 @@ function TicketRow({
 }) {
     return (
         <button
-            className="group bg-secondary/20 hover:bg-secondary/40 w-full cursor-pointer rounded-xl border border-border/60 hover:border-border p-4 text-left transition-all shadow-sm"
+            className="group bg-secondary/20 hover:bg-secondary/40 border-border/60 hover:border-border w-full cursor-pointer rounded-xl border p-4 text-left shadow-sm transition-all"
             onClick={onClick}
         >
             <div className="mb-1.5 flex items-center justify-between">
@@ -278,7 +261,9 @@ function TicketRow({
                 </div>
                 <div className="text-muted-foreground flex items-center gap-2 text-xs">
                     {ticket.messageCount > 0 && (
-                        <span>{ticket.messageCount} msg{ticket.messageCount !== 1 ? 's' : ''}</span>
+                        <span>
+                            {ticket.messageCount} msg{ticket.messageCount !== 1 ? 's' : ''}
+                        </span>
                     )}
                 </div>
             </div>

@@ -212,8 +212,10 @@ export default function DiagnosticsPage() {
                 {/* Left column */}
                 <div className="space-y-4">
                     {/* Environment */}
-                    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground/60">Environment</h2>
+                    <div className="border-border/60 bg-card rounded-xl border p-4 shadow-sm">
+                        <h2 className="text-muted-foreground/60 mb-3 text-sm font-medium tracking-wider uppercase">
+                            Environment
+                        </h2>
                         {!host ? (
                             <p className="text-muted-foreground text-sm">Host data not available.</p>
                         ) : host.error ? (
@@ -244,8 +246,8 @@ export default function DiagnosticsPage() {
                                         </p>
                                         <p>
                                             <strong>Memory:</strong> {host.dynamic.memory.usage ?? '--'}% (
-                                            {host.dynamic.memory.used?.toFixed(2) ?? '--'}/{host.dynamic.memory.total?.toFixed(2) ?? '--'}
-                                            )
+                                            {host.dynamic.memory.used?.toFixed(2) ?? '--'}/
+                                            {host.dynamic.memory.total?.toFixed(2) ?? '--'})
                                         </p>
                                     </>
                                 ) : (
@@ -256,8 +258,10 @@ export default function DiagnosticsPage() {
                     </div>
 
                     {/* fxPanel Runtime */}
-                    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground/60">fxPanel Runtime</h2>
+                    <div className="border-border/60 bg-card rounded-xl border p-4 shadow-sm">
+                        <h2 className="text-muted-foreground/60 mb-3 text-sm font-medium tracking-wider uppercase">
+                            fxPanel Runtime
+                        </h2>
                         <div className="space-y-1 text-sm">
                             <p>
                                 <strong>Uptime:</strong> <code>{txadmin.uptime}</code>
@@ -377,8 +381,10 @@ export default function DiagnosticsPage() {
                 {/* Right column */}
                 <div className="space-y-4">
                     {/* Diagnostics Report */}
-                    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground/60">Diagnostics Report</h2>
+                    <div className="border-border/60 bg-card rounded-xl border p-4 shadow-sm">
+                        <h2 className="text-muted-foreground/60 mb-3 text-sm font-medium tracking-wider uppercase">
+                            Diagnostics Report
+                        </h2>
                         <div className="flex items-center justify-between gap-4">
                             <p className="text-sm">
                                 To receive fxPanel Support, it is recommended that you send the diagnostics data
@@ -398,64 +404,70 @@ export default function DiagnosticsPage() {
                     </div>
 
                     {/* FXServer Info */}
-                    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground/60">FXServer /info.json</h2>
+                    <div className="border-border/60 bg-card rounded-xl border p-4 shadow-sm">
+                        <h2 className="text-muted-foreground/60 mb-3 text-sm font-medium tracking-wider uppercase">
+                            FXServer /info.json
+                        </h2>
                         {!fxserver ? (
                             <p className="text-muted-foreground text-sm">FXServer data not available.</p>
-                        ) : (<>
-                        {fxserver.versionMismatch && (
-                            <div className="bg-destructive/10 border-destructive/30 mb-3 rounded border p-3 text-center text-sm">
-                                <strong className="text-destructive">
-                                    This version doesn't match fxPanel's version!
-                                </strong>
-                                <br />
-                                If you just updated FXServer, restart fxPanel. Otherwise, it means FXServer was already
-                                running before fxPanel started, and nothing is going to work properly.
-                            </div>
-                        )}
-                        {fxserver.error !== false && fxserver.error ? (
-                            <p className="text-destructive">{fxserver.error}</p>
                         ) : (
-                            <div className="space-y-1 text-sm">
-                                <p>
-                                    <strong>Status: </strong>
-                                    <span
-                                        className={`rounded px-1.5 py-0.5 text-xs font-bold ${
-                                            fxserver.statusColor === 'success'
-                                                ? 'bg-success/20 text-success'
-                                                : fxserver.statusColor === 'warning'
-                                                  ? 'bg-warning/20 text-warning'
-                                                  : fxserver.statusColor === 'danger'
-                                                    ? 'bg-destructive/20 text-destructive'
-                                                    : 'bg-secondary text-secondary-foreground'
-                                        }`}
-                                    >
-                                        {fxserver.status}
-                                    </span>
-                                </p>
-                                <p>
-                                    <strong>Version:</strong> {fxserver.version}
-                                </p>
-                                <p>
-                                    <strong>Resources:</strong> {fxserver.resources}
-                                </p>
-                                <p>
-                                    <strong>OneSync:</strong> {fxserver.onesync}
-                                </p>
-                                <p>
-                                    <strong>Max Clients:</strong> {fxserver.maxClients}
-                                </p>
-                                <p>
-                                    <strong>fxPanel Version:</strong> {fxserver.txAdminVersion}
-                                </p>
-                            </div>
+                            <>
+                                {fxserver.versionMismatch && (
+                                    <div className="bg-destructive/10 border-destructive/30 mb-3 rounded border p-3 text-center text-sm">
+                                        <strong className="text-destructive">
+                                            This version doesn't match fxPanel's version!
+                                        </strong>
+                                        <br />
+                                        If you just updated FXServer, restart fxPanel. Otherwise, it means FXServer was
+                                        already running before fxPanel started, and nothing is going to work properly.
+                                    </div>
+                                )}
+                                {fxserver.error !== false && fxserver.error ? (
+                                    <p className="text-destructive">{fxserver.error}</p>
+                                ) : (
+                                    <div className="space-y-1 text-sm">
+                                        <p>
+                                            <strong>Status: </strong>
+                                            <span
+                                                className={`rounded px-1.5 py-0.5 text-xs font-bold ${
+                                                    fxserver.statusColor === 'success'
+                                                        ? 'bg-success/20 text-success'
+                                                        : fxserver.statusColor === 'warning'
+                                                          ? 'bg-warning/20 text-warning'
+                                                          : fxserver.statusColor === 'danger'
+                                                            ? 'bg-destructive/20 text-destructive'
+                                                            : 'bg-secondary text-secondary-foreground'
+                                                }`}
+                                            >
+                                                {fxserver.status}
+                                            </span>
+                                        </p>
+                                        <p>
+                                            <strong>Version:</strong> {fxserver.version}
+                                        </p>
+                                        <p>
+                                            <strong>Resources:</strong> {fxserver.resources}
+                                        </p>
+                                        <p>
+                                            <strong>OneSync:</strong> {fxserver.onesync}
+                                        </p>
+                                        <p>
+                                            <strong>Max Clients:</strong> {fxserver.maxClients}
+                                        </p>
+                                        <p>
+                                            <strong>fxPanel Version:</strong> {fxserver.txAdminVersion}
+                                        </p>
+                                    </div>
+                                )}
+                            </>
                         )}
-                        </>)}
                     </div>
 
                     {/* Processes */}
-                    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground/60">Processes</h2>
+                    <div className="border-border/60 bg-card rounded-xl border p-4 shadow-sm">
+                        <h2 className="text-muted-foreground/60 mb-3 text-sm font-medium tracking-wider uppercase">
+                            Processes
+                        </h2>
                         {!processes?.length ? (
                             <p className="text-muted-foreground text-sm">
                                 Failed to retrieve process data. Check the terminal for more information (if verbosity

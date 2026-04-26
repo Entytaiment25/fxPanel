@@ -19,22 +19,26 @@ export function usePlayersStats() {
         setIsLoading(true);
         setError(null);
         if (import.meta.env.DEV) {
-            import('./devMockPlayers').then(({ getMockPlayersStats }) => {
-                if (!isMounted) return;
-                const data = getMockPlayersStats();
-                if (data && 'error' in data) {
-                    setStats(undefined);
-                    setError(new Error(data.error));
-                } else {
-                    setStats(data);
-                }
-                setIsLoading(false);
-            }).catch((err) => {
-                if (!isMounted) return;
-                setError(err instanceof Error ? err : new Error(String(err)));
-                setIsLoading(false);
-            });
-            return () => { isMounted = false; };
+            import('./devMockPlayers')
+                .then(({ getMockPlayersStats }) => {
+                    if (!isMounted) return;
+                    const data = getMockPlayersStats();
+                    if (data && 'error' in data) {
+                        setStats(undefined);
+                        setError(new Error(data.error));
+                    } else {
+                        setStats(data);
+                    }
+                    setIsLoading(false);
+                })
+                .catch((err) => {
+                    if (!isMounted) return;
+                    setError(err instanceof Error ? err : new Error(String(err)));
+                    setIsLoading(false);
+                });
+            return () => {
+                isMounted = false;
+            };
         }
         statsApi({
             success(data) {

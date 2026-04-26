@@ -185,7 +185,7 @@ export default function CfgEditorPage() {
         <div className="h-contentvh flex w-full flex-col gap-3 px-2 md:px-0">
             {/* CFG Errors Banner */}
             {initialData?.cfgErrors && (
-                <div className="shrink-0 relative rounded-lg border border-[rgba(244,5,82,0.4)] bg-[rgba(244,5,82,0.15)] p-4">
+                <div className="relative shrink-0 rounded-lg border border-[rgba(244,5,82,0.4)] bg-[rgba(244,5,82,0.15)] p-4">
                     <strong className="text-destructive">&#9888; Server failed to start due to config error(s):</strong>
                     <div className="mt-2 text-sm">
                         <MarkdownProse md={initialData.cfgErrors} isSmall />
@@ -198,7 +198,7 @@ export default function CfgEditorPage() {
             )}
 
             {/* File Picker */}
-            <div className="shrink-0 flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-3">
                 <select
                     className={SELECT_CLASS}
                     style={{ maxWidth: 280 }}
@@ -216,7 +216,7 @@ export default function CfgEditorPage() {
             </div>
 
             {/* Monaco Editor */}
-            <div className="relative flex-1 min-h-0 overflow-hidden rounded-lg border">
+            <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg border">
                 <div className="absolute inset-0">
                     <LazyMonacoEditor
                         height="100%"

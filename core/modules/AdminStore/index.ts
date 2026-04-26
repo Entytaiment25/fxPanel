@@ -109,9 +109,7 @@ export default class AdminStore {
      */
     verifyMasterPin(input: string): boolean {
         if (typeof this.addMasterPin !== 'string' || !this.addMasterPin.length) return false;
-        const normalised = (typeof input === 'string' ? input : '')
-            .toUpperCase()
-            .replace(/[\s-]/g, '');
+        const normalised = (typeof input === 'string' ? input : '').toUpperCase().replace(/[\s-]/g, '');
         const expectedBuf = Buffer.from(this.addMasterPin);
         const inputBuf = Buffer.from(normalised);
         if (inputBuf.length !== expectedBuf.length) {
@@ -582,7 +580,9 @@ export default class AdminStore {
         if (adminIndex === -1) throw new Error('Admin not found');
         const codes = this.admins[adminIndex].totp_backup_codes;
         if (!codes || codeIndex < 0 || codeIndex >= codes.length) {
-            console.warn(`consumeBackupCode: invalid state for admin "${username}" — codeIndex=${codeIndex}, codes.length=${codes?.length ?? 'N/A (no codes array)'}`);
+            console.warn(
+                `consumeBackupCode: invalid state for admin "${username}" — codeIndex=${codeIndex}, codes.length=${codes?.length ?? 'N/A (no codes array)'}`,
+            );
             return;
         }
         codes.splice(codeIndex, 1);

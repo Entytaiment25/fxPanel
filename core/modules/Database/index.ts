@@ -38,11 +38,14 @@ export default class Database {
         this.reports = this.tickets; // backwards compat alias
 
         // Wait for database to be ready, then build indexes
-        this.#db.whenReady().then(() => {
-            this.actions.buildIndexes();
-        }).catch((error) => {
-            console.error('Failed to build database indexes:', error.message ?? error);
-        });
+        this.#db
+            .whenReady()
+            .then(() => {
+                this.actions.buildIndexes();
+            })
+            .catch((error) => {
+                console.error('Failed to build database indexes:', error.message ?? error);
+            });
 
         //Database optimization cron function
         const optimizerTask = () => {

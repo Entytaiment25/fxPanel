@@ -180,13 +180,10 @@ const DialogActionView: React.FC = () => {
         if (!userHasPerm('players.heal', playerPerms)) return showNoPerms('Heal');
 
         try {
-            const result = await fetchWebPipe<GenericApiResp>(
-                `/player/heal?mutex=current&netid=${assocPlayer.id}`,
-                {
-                    method: 'POST',
-                    data: {},
-                },
-            );
+            const result = await fetchWebPipe<GenericApiResp>(`/player/heal?mutex=current&netid=${assocPlayer.id}`, {
+                method: 'POST',
+                data: {},
+            });
             handleGenericApiResponse(result, 'interaction.notifications.heal_player');
         } catch (error) {
             enqueueSnackbar((error as Error).message, { variant: 'error' });

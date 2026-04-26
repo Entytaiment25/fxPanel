@@ -167,8 +167,8 @@ export default function ConfigCardGeneral({ cardCtx, pageCtx }: SettingsCardProp
                         uncheckedLabel="Disabled"
                     />
                     <SettingItemDesc>
-                        When enabled, all admins can change their own identifiers (FiveM &amp; Discord) from the
-                        Account dialog. <br />
+                        When enabled, all admins can change their own identifiers (FiveM &amp; Discord) from the Account
+                        dialog. <br />
                         When disabled, only admins with the <strong>Manage Admins</strong> permission can edit
                         identifiers.
                     </SettingItemDesc>

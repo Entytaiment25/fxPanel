@@ -154,7 +154,11 @@ export class SessionMemoryStorage {
             fs.writeFileSync(this.persistFilePath, JSON.stringify(entries), { mode: 0o600 });
             // Best-effort tighten perms on existing file (writeFileSync mode only
             // applies on create; chmod for updates).
-            try { fs.chmodSync(this.persistFilePath, 0o600); } catch { /* ignore */ }
+            try {
+                fs.chmodSync(this.persistFilePath, 0o600);
+            } catch {
+                /* ignore */
+            }
             console.verbose.debug(
                 `Persisted ${entries.length} sessions to disk (dropped ${droppedSensitive} password-authenticated).`,
             );

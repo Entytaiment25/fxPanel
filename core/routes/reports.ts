@@ -260,8 +260,16 @@ export const ticketsMessage = async (ctx: AuthedCtx) => {
             txCore.database.tickets.setStatus(id, 'inReview', undefined);
         }
 
-        const msgPayload = { author: ctx.admin.name, authorType: 'admin' as const, content: content.trim(), imageUrls: sanitizedImageUrls, ts: msgTs };
-        txCore.discordBot.postTicketThreadMessage(id, ctx.admin.name, content.trim(), sanitizedImageUrls).catch(() => {});
+        const msgPayload = {
+            author: ctx.admin.name,
+            authorType: 'admin' as const,
+            content: content.trim(),
+            imageUrls: sanitizedImageUrls,
+            ts: msgTs,
+        };
+        txCore.discordBot
+            .postTicketThreadMessage(id, ctx.admin.name, content.trim(), sanitizedImageUrls)
+            .catch(() => {});
         notifyPlayerNewMessage(id, msgPayload);
 
         return ctx.send<ApiTicketMessageResp>({ success: true });
@@ -292,7 +300,7 @@ export const ticketsStatus = async (ctx: AuthedCtx) => {
         const success = txCore.database.tickets.setStatus(
             id,
             status as TicketStatus,
-            (status === 'resolved' || status === 'closed') ? ctx.admin.name : undefined,
+            status === 'resolved' || status === 'closed' ? ctx.admin.name : undefined,
         );
         if (!success) {
             return ctx.send<ApiTicketStatusResp>({ error: 'Ticket not found.' });
@@ -461,9 +469,8 @@ export const ticketsScreenshot = async (ctx: InitializedCtx) => {
     // New format: id includes extension (e.g., uuid.jpg)
     // Old format: id is just a UUID, file is saved as uuid.png
     const ext = path.extname(id).toLowerCase();
-    const filePath = ext && EXT_TO_MIME[ext]
-        ? path.join(SCREENSHOT_DIR(), id)
-        : path.join(SCREENSHOT_DIR(), `${id}.png`);
+    const filePath =
+        ext && EXT_TO_MIME[ext] ? path.join(SCREENSHOT_DIR(), id) : path.join(SCREENSHOT_DIR(), `${id}.png`);
     const contentType = (ext && EXT_TO_MIME[ext]) || 'image/png';
     try {
         const data = await fsp.readFile(filePath);
@@ -500,10 +507,7 @@ export const ticketCreate = async (data: IntercomTicketCreateReq): Promise<ApiCr
         const targetNetids = (data.targets ?? []).map((t) => t.netid ?? 0).filter((n) => n > 0);
         const logContext = pullLogContext(data.reporter.netid, targetNetids, tsNow);
 
-        const ticketId = txCore.database.tickets.create(
-            { ...data, description: data.description.trim() },
-            logContext,
-        );
+        const ticketId = txCore.database.tickets.create({ ...data, description: data.description.trim() }, logContext);
 
         // Handle screenshot data
         if (data.screenshotData) {
@@ -519,11 +523,15 @@ export const ticketCreate = async (data: IntercomTicketCreateReq): Promise<ApiCr
                     // Approximate decoded size from base64 length to reject oversized payloads early
                     const approxBytes = Math.floor((base64Data.length * 3) / 4);
                     if (approxBytes > MAX_SCREENSHOT_BYTES) {
-                        console.verbose.warn(`Rejected oversized screenshot for ${ticketId}: ~${approxBytes} bytes (max ${MAX_SCREENSHOT_BYTES})`);
+                        console.verbose.warn(
+                            `Rejected oversized screenshot for ${ticketId}: ~${approxBytes} bytes (max ${MAX_SCREENSHOT_BYTES})`,
+                        );
                     } else {
                         const buffer = Buffer.from(base64Data, 'base64');
                         if (buffer.length > MAX_SCREENSHOT_BYTES) {
-                            console.verbose.warn(`Rejected oversized screenshot for ${ticketId}: ${buffer.length} bytes (max ${MAX_SCREENSHOT_BYTES})`);
+                            console.verbose.warn(
+                                `Rejected oversized screenshot for ${ticketId}: ${buffer.length} bytes (max ${MAX_SCREENSHOT_BYTES})`,
+                            );
                         } else {
                             const screenshotId = `${randomUUID()}${ext}`;
                             await fsp.writeFile(path.join(screenshotDir, screenshotId), buffer);
@@ -604,7 +612,10 @@ export const ticketPlayerList = (playerLicense: string): ApiGetPlayerTicketsResp
 /**
  * ticketPlayerMessages intercom — Returns full messages for a player's own ticket
  */
-export const ticketPlayerMessages = (ticketId: string, playerLicense: string): { messages: TicketMessage[] } | { error: string } => {
+export const ticketPlayerMessages = (
+    ticketId: string,
+    playerLicense: string,
+): { messages: TicketMessage[] } | { error: string } => {
     if (!txConfig.gameFeatures.reportsEnabled) return { error: 'Reports are disabled.' };
     if (typeof ticketId !== 'string' || !ticketId.length) return { error: 'Invalid ticket ID.' };
     if (typeof playerLicense !== 'string' || !playerLicense.length) return { error: 'Invalid license.' };
@@ -659,7 +670,9 @@ export const ticketPlayerMessage = (
             return { error: 'Failed to add message.' };
         }
 
-        txCore.discordBot.postTicketThreadMessage(ticketId, ticket.reporter.name, content.trim(), sanitizedImageUrls).catch(() => {});
+        txCore.discordBot
+            .postTicketThreadMessage(ticketId, ticket.reporter.name, content.trim(), sanitizedImageUrls)
+            .catch(() => {});
 
         return { success: true };
     } catch (error) {
@@ -719,9 +732,7 @@ function validateTicketId(ticketId: unknown): { error: string } | null {
 
 /** Looks up a ticket by id, returning either the ticket or an error response. */
 type Ticket = NonNullable<ReturnType<typeof txCore.database.tickets.findOne>>;
-function fetchTicketOrError(ticketId: string):
-    | { kind: 'ok'; ticket: Ticket }
-    | { kind: 'error'; message: string } {
+function fetchTicketOrError(ticketId: string): { kind: 'ok'; ticket: Ticket } | { kind: 'error'; message: string } {
     const ticket = txCore.database.tickets.findOne(ticketId);
     if (!ticket) return { kind: 'error', message: 'Ticket not found.' };
     return { kind: 'ok', ticket };
@@ -784,7 +795,7 @@ function setTicketStatus(
     const success = txCore.database.tickets.setStatus(
         ticketId,
         status,
-        (status === 'resolved' || status === 'closed') ? adminName : undefined,
+        status === 'resolved' || status === 'closed' ? adminName : undefined,
     );
     if (!success) return { error: 'Ticket not found.' };
 
@@ -802,11 +813,7 @@ function setTicketStatus(
 }
 
 /** Appends a staff note to a ticket. */
-function addStaffNote(
-    ticketId: string,
-    adminName: string,
-    content: string,
-): { success: true } | { error: string } {
+function addStaffNote(ticketId: string, adminName: string, content: string): { success: true } | { error: string } {
     const success = txCore.database.tickets.addStaffNote(ticketId, {
         authorAdminId: adminName,
         authorName: adminName,
@@ -821,10 +828,7 @@ function addStaffNote(
  * Toggles a ticket's claim by `adminName`: clears it if already claimed by
  * this admin, otherwise assigns it.
  */
-function toggleClaim(
-    ticketId: string,
-    adminName: string,
-): { success: true; claimedBy?: string } | { error: string } {
+function toggleClaim(ticketId: string, adminName: string): { success: true; claimedBy?: string } | { error: string } {
     const lookup = fetchTicketOrError(ticketId);
     if (lookup.kind === 'error') return { error: lookup.message };
     const ticket = lookup.ticket;
@@ -895,11 +899,7 @@ export const ticketAdminMessage = (
     }
 };
 
-export const ticketAdminStatus = (
-    ticketId: string,
-    status: string,
-    adminName: string,
-): ApiTicketStatusResp => {
+export const ticketAdminStatus = (ticketId: string, status: string, adminName: string): ApiTicketStatusResp => {
     const disabled = ensureReportsEnabled();
     if (disabled) return disabled;
     const validStatuses: TicketStatus[] = ['open', 'inReview', 'resolved', 'closed'];
@@ -914,11 +914,7 @@ export const ticketAdminStatus = (
     }
 };
 
-export const ticketAdminNote = (
-    ticketId: string,
-    adminName: string,
-    content: string,
-): ApiTicketNoteResp => {
+export const ticketAdminNote = (ticketId: string, adminName: string, content: string): ApiTicketNoteResp => {
     const disabled = ensureReportsEnabled();
     if (disabled) return disabled;
     if (typeof ticketId !== 'string' || typeof content !== 'string' || !content.trim().length) {
@@ -932,10 +928,7 @@ export const ticketAdminNote = (
     }
 };
 
-export const ticketAdminClaim = (
-    ticketId: string,
-    adminName: string,
-): ApiTicketClaimResp => {
+export const ticketAdminClaim = (ticketId: string, adminName: string): ApiTicketClaimResp => {
     const disabled = ensureReportsEnabled();
     if (disabled) return disabled;
     if (typeof ticketId !== 'string') return { error: 'Invalid request.' };
@@ -995,10 +988,13 @@ export const reportsMessage = ticketsMessage;
 export const reportsStatus = ticketsStatus;
 export const reportsCreate = async (data: any): Promise<any> => {
     const validCategories = txConfig.gameFeatures.ticketCategories;
-    const mappedCategory = data.type === 'playerReport' ? 'Player Report' : data.type === 'bugReport' ? 'Bug Report' : 'Question';
+    const mappedCategory =
+        data.type === 'playerReport' ? 'Player Report' : data.type === 'bugReport' ? 'Bug Report' : 'Question';
     const category = validCategories.includes(mappedCategory) ? mappedCategory : (validCategories[0] ?? mappedCategory);
     if (category !== mappedCategory) {
-        console.warn(`[reportsCreate] Legacy type '${data.type}' mapped to '${mappedCategory}' which is not in ticketCategories, falling back to '${category}'`);
+        console.warn(
+            `[reportsCreate] Legacy type '${data.type}' mapped to '${mappedCategory}' which is not in ticketCategories, falling back to '${category}'`,
+        );
     }
     return ticketCreate({
         ...data,
@@ -1015,4 +1011,3 @@ export const reportsAdminMessage = (id: string, adminName: string, content: stri
     ticketAdminMessage(id, adminName, content);
 export const reportsAdminStatus = (id: string, status: string, adminName: string) =>
     ticketAdminStatus(id, status, adminName);
-

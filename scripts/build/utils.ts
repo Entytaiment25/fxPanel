@@ -219,7 +219,9 @@ export const copyStaticFiles = (targetPath: string, txVersion: string, eventName
             fs.cpSync(srcPath, destPath, { recursive: true, force: true });
         } catch (error) {
             failures++;
-            console.error(`[COPIER] Failed to copy ${srcPath} → ${destPath}: ${error instanceof Error ? error.message : String(error)}`);
+            console.error(
+                `[COPIER] Failed to copy ${srcPath} → ${destPath}: ${error instanceof Error ? error.message : String(error)}`,
+            );
         }
     }
     try {

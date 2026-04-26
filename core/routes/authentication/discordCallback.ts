@@ -72,7 +72,7 @@ export default async function AuthDiscordCallback(ctx: InitializedCtx) {
                 errorMessage: `Status ${tokenRes.status}`,
             });
         }
-        const tokenData = await tokenRes.json() as { access_token?: unknown };
+        const tokenData = (await tokenRes.json()) as { access_token?: unknown };
         if (!tokenData.access_token || typeof tokenData.access_token !== 'string') {
             const safeKeys = Object.keys(tokenData).join(', ');
             console.verbose.warn(`Discord token exchange returned invalid access_token. Response fields: ${safeKeys}`);
@@ -103,7 +103,7 @@ export default async function AuthDiscordCallback(ctx: InitializedCtx) {
                 errorMessage: `Status ${userRes.status}`,
             });
         }
-        const userData = await userRes.json() as { id: string; username: string; global_name?: string };
+        const userData = (await userRes.json()) as { id: string; username: string; global_name?: string };
         discordId = userData.id;
         discordUsername = userData.global_name || userData.username;
     } catch (error) {

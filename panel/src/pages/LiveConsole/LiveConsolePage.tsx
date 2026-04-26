@@ -524,7 +524,7 @@ export default function LiveConsolePage() {
     };
 
     return (
-        <div className="dark text-primary h-contentvh bg-card flex w-full flex-col overflow-clip border border-border/60 shadow-sm md:rounded-xl">
+        <div className="dark text-primary h-contentvh bg-card border-border/60 flex w-full flex-col overflow-clip border shadow-sm md:rounded-xl">
             <LiveConsoleHeader
                 isConnected={isConnected}
                 hasSpawnLines={spawnLineNumbersRef.current.length > 0}

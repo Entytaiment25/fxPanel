@@ -153,11 +153,19 @@ export default function AdminEditDialog({ target, allPresets, onClose, onSaved, 
     // Show temp password screen after adding
     if (tempPassword) {
         return (
-            <Dialog open onOpenChange={() => { onSaved(); onClose(); }}>
+            <Dialog
+                open
+                onOpenChange={() => {
+                    onSaved();
+                    onClose();
+                }}
+            >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>Admin Created</DialogTitle>
-                        <DialogDescription>A temporary password has been generated; copy it now â€” it will not be shown again.</DialogDescription>
+                        <DialogDescription>
+                            A temporary password has been generated; copy it now â€” it will not be shown again.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-3">
                         <p className="text-muted-foreground text-sm">

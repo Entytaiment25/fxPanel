@@ -289,6 +289,9 @@
 
                 // ---- Message handler ----
                 window.addEventListener('message', function (event) {
+                    if (event.source !== window) return;
+                    if (event.origin && event.origin !== 'null' && event.origin !== window.location.origin) return;
+
                     var msg = event.data;
                     if (!msg || !msg.action) return;
 

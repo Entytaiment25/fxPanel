@@ -65,7 +65,7 @@ export default async function PlayerActions(ctx: AuthedCtx) {
  */
 async function handleSaveNote(ctx: AuthedCtx, player: PlayerClass): Promise<GenericApiResp> {
     //Checking request
-    if (anyUndefined(ctx.request.body, ctx.request.body.note)) {
+    if (anyUndefined(ctx.request.body, ctx.request.body.note) || typeof ctx.request.body.note !== 'string') {
         return { error: 'Invalid request.' };
     }
     const note = ctx.request.body.note.trim();
@@ -84,7 +84,7 @@ async function handleSaveNote(ctx: AuthedCtx, player: PlayerClass): Promise<Gene
  */
 async function handleWarning(ctx: AuthedCtx, player: PlayerClass): Promise<GenericApiResp> {
     //Checking request
-    if (anyUndefined(ctx.request.body, ctx.request.body.reason)) {
+    if (anyUndefined(ctx.request.body, ctx.request.body.reason) || typeof ctx.request.body.reason !== 'string') {
         return { error: 'Invalid request.' };
     }
     const reason = ctx.request.body.reason.trim() || 'no reason provided';
@@ -133,7 +133,11 @@ async function handleWarning(ctx: AuthedCtx, player: PlayerClass): Promise<Gener
  */
 async function handleBan(ctx: AuthedCtx, player: PlayerClass): Promise<GenericApiResp> {
     //Checking request
-    if (anyUndefined(ctx.request.body, ctx.request.body.duration, ctx.request.body.reason)) {
+    if (
+        anyUndefined(ctx.request.body, ctx.request.body.duration, ctx.request.body.reason) ||
+        typeof ctx.request.body.duration !== 'string' ||
+        typeof ctx.request.body.reason !== 'string'
+    ) {
         return { error: 'Invalid request.' };
     }
     const durationInput = ctx.request.body.duration.trim();
@@ -294,7 +298,7 @@ async function handleSetTag(ctx: AuthedCtx, player: PlayerClass): Promise<Generi
  */
 async function handleDirectMessage(ctx: AuthedCtx, player: PlayerClass): Promise<GenericApiResp> {
     //Checking request
-    if (anyUndefined(ctx.request.body, ctx.request.body.message)) {
+    if (anyUndefined(ctx.request.body, ctx.request.body.message) || typeof ctx.request.body.message !== 'string') {
         return { error: 'Invalid request.' };
     }
     const message = ctx.request.body.message.trim();
@@ -336,7 +340,7 @@ async function handleDirectMessage(ctx: AuthedCtx, player: PlayerClass): Promise
  */
 async function handleKick(ctx: AuthedCtx, player: PlayerClass): Promise<GenericApiResp> {
     //Checking request
-    if (anyUndefined(ctx.request.body, ctx.request.body.reason)) {
+    if (anyUndefined(ctx.request.body, ctx.request.body.reason) || typeof ctx.request.body.reason !== 'string') {
         return { error: 'Invalid request.' };
     }
     const kickReason = ctx.request.body.reason.trim() || txCore.translator.t('kick_messages.unknown_reason');

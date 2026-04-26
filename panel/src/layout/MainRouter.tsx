@@ -1,4 +1,5 @@
 import { ErrorBoundary } from 'react-error-boundary';
+import type { ReactElement } from 'react';
 import { Route as WouterRoute, Switch } from 'wouter';
 import { PageErrorFallback } from '@/components/ErrorFallback';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -41,7 +42,7 @@ type RouteType = {
     path: string;
     title: string;
     permission?: string;
-    Page: JSX.Element;
+    Page: ReactElement;
 };
 
 const allRoutes: RouteType[] = [
@@ -253,11 +254,7 @@ export function MainRouterInner() {
             ))}
 
             {/* While addons are loading, don't show NotFound for addon paths */}
-            {addonsLoading && (
-                <WouterRoute path="/addon/:rest*">
-                    {null}
-                </WouterRoute>
-            )}
+            {addonsLoading && <WouterRoute path="/addon/:rest*">{null}</WouterRoute>}
 
             {/* Other Routes - they need to set the title manually */}
             {import.meta.env.DEV && (
