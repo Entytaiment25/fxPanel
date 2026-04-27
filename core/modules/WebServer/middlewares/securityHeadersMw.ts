@@ -75,10 +75,10 @@ const securityHeadersMw = async (ctx: RawKoaCtx, next: Next) => {
     //Control referrer information to protect sensitive URLs
     ctx.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-    //Disable browser features that aren't needed
+    //Disable browser features that aren't needed, but allow clipboard for copy-to-clipboard functionality
     ctx.set(
         'Permissions-Policy',
-        'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()',
+        'accelerometer=(), camera=(), clipboard-read=*, clipboard-write=*, geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()',
     );
 
     //Set Content Security Policy to prevent XSS and data injection

@@ -34,6 +34,8 @@ import {
     ChevronLeftIcon,
     BlocksIcon,
     WrenchIcon,
+    MoonIcon,
+    SunIcon,
 } from 'lucide-react';
 import { LogoFullSquareGreen } from '@/components/Logos';
 import { NavLink } from '@/components/MainPageLink';
@@ -53,6 +55,7 @@ import { FaDiscord } from 'react-icons/fa';
 import { openExternalLink } from '@/lib/navigation';
 import Avatar from '@/components/Avatar';
 import { useAccountModal } from '@/hooks/dialogs';
+import { useIsDarkMode, useToggleTheme } from '@/hooks/theme';
 
 // ─── Collapse context ─────────────────────────────────────────────────────────
 const SidebarCollapsedCtx = createContext(false);
@@ -315,6 +318,45 @@ function ServerStatusCard() {
 }
 
 // ─── User account dropdown ────────────────────────────────────────────────────
+function SidebarThemeToggle() {
+    const collapsed = useCollapsed();
+    const toggleTheme = useToggleTheme();
+    const isDarkMode = useIsDarkMode();
+    const label = isDarkMode ? 'Switch to light mode' : 'Switch to dark mode';
+
+    if (collapsed) {
+        return (
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        type="button"
+                        onClick={toggleTheme}
+                        className="text-muted-foreground hover:text-foreground hover:bg-secondary/40 inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+                        title={label}
+                        aria-label={label}
+                    >
+                        {isDarkMode ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">{label}</TooltipContent>
+            </Tooltip>
+        );
+    }
+
+    return (
+        <button
+            type="button"
+            onClick={toggleTheme}
+            title={label}
+            aria-label={label}
+            className="text-muted-foreground hover:text-foreground hover:bg-secondary/40 flex h-8 w-full items-center gap-2 rounded-md px-2 text-sm transition-colors"
+        >
+            {isDarkMode ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
+            <span className="leading-none">{isDarkMode ? 'Light mode' : 'Dark mode'}</span>
+        </button>
+    );
+}
+
 function SidebarUserButton() {
     const { authData, logout } = useAuth();
     const { setAccountModalOpen } = useAccountModal();
@@ -390,7 +432,7 @@ export default function LeftSidebar() {
         <SidebarCollapsedCtx.Provider value={collapsed}>
             <aside
                 className={cn(
-                    'border-border/40 hidden h-screen shrink-0 flex-col overflow-hidden border-r bg-[#0c0e16] transition-[width] duration-200 lg:flex',
+                    'border-border/40 bg-background hidden h-screen shrink-0 flex-col overflow-hidden border-r transition-[width] duration-200 lg:flex',
                     collapsed ? 'w-14' : 'w-60',
                 )}
             >
@@ -439,6 +481,7 @@ export default function LeftSidebar() {
                     )}
                 >
                     <ServerStatusCard />
+                    <SidebarThemeToggle />
                     <SidebarUserButton />
                 </div>
             </aside>
@@ -567,4 +610,4 @@ export function SidebarNavContent() {
 }
 
 // Re-export so the mobile sheet can use the same bottom controls.
-export { ServerStatusCard, SidebarUserButton, SidebarCollapsedCtx };
+export { ServerStatusCard, SidebarThemeToggle, SidebarUserButton, SidebarCollapsedCtx };
