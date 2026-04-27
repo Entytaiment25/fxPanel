@@ -64,7 +64,8 @@ type ActionResp = {
     markdown?: boolean;
 };
 
-// - -  Step: Review - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - function StepReview({
+// - -  Step: Review - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+function StepReview({
     recipe,
     onConfirm,
     onCancel,
@@ -451,7 +452,8 @@ function StepConfigure({
     );
 }
 
-// - -  Main Deployer Page - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - export default function DeployerPage() {
+// - -  Main Deployer Page - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+export default function DeployerPage() {
     const [actionLoading, setActionLoading] = useState(false);
 
     const dataApi = useBackendApi<DeployerDataResp>({
