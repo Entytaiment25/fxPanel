@@ -6,6 +6,7 @@ import { FileCopy } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { useTranslate } from 'react-polyglot';
 import { DialogLoadError } from './DialogLoadError';
+import { copyToClipboard } from '../../../utils/copyToClipboard';
 
 const PREFIX = 'DialogIdView';
 
@@ -58,7 +59,7 @@ const DialogIdView: React.FC = () => {
     const handleCopyToClipboard = (value: string) => {
         const safeValue = sanitiseIdentifier(value);
         if (!safeValue) return;
-        navigator.clipboard.writeText(safeValue).catch(() => undefined);
+        copyToClipboard(safeValue, true);
         enqueueSnackbar(t('nui_menu.common.copied'), { variant: 'info' });
     };
 

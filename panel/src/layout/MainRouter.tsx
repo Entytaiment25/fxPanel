@@ -245,7 +245,7 @@ export function MainRouterInner() {
                 <Route key={route.path} {...route} />
             ))}
 
-            {/* Addon Routes â€” WouterRoute must be the direct Switch child
+            {/* Addon Routes - WouterRoute must be the direct Switch child
                 so that Switch can read props.path for matching. */}
             {addonPages.map((route) => (
                 <WouterRoute key={route.path} path={route.path}>

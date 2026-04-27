@@ -736,6 +736,9 @@ export const ReportPage: React.FC = () => {
         if (data.success) {
             setErrorMessage(null);
             fetchNui('ticketFetchMine').catch(() => {});
+            if (selectedTicket) {
+                fetchNui('ticketFetchMessages', { ticketId: selectedTicket.id }).catch(() => {});
+            }
         } else if (data.error) {
             setErrorMessage(data.error);
         }

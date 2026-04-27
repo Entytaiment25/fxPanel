@@ -109,7 +109,7 @@ export default function AdminManagerPage() {
         }
     }, []);
 
-    // â”€â”€ Admin list â”€â”€
+    // - -  Admin list - - 
     const listApi = useBackendApi<ApiGetAdminListResp>({
         method: 'GET',
         path: '/adminManager/list',
@@ -137,7 +137,7 @@ export default function AdminManagerPage() {
         return data.admins;
     });
 
-    // â”€â”€ Admin stats â”€â”€
+    // - -  Admin stats - - 
     const statsQueryApi = useBackendApi<ApiGetAdminStatsResp>({
         method: 'GET',
         path: '/adminManager/stats',
@@ -161,7 +161,7 @@ export default function AdminManagerPage() {
         return ranks;
     }, [adminStats]);
 
-    // â”€â”€ Presets â”€â”€
+    // - -  Presets - - 
     const presetsQueryApi = useBackendApi<ApiGetPresetsResp>({
         method: 'GET',
         path: '/adminManager/presets',
@@ -337,7 +337,7 @@ export default function AdminManagerPage() {
                     </TabsTrigger>
                 </TabsList>
 
-                {/* â”€â”€ Admins tab â”€â”€ */}
+                {/* - -  Admins tab - -  */}
                 <TabsContent value="admins" className="mt-0 flex flex-col gap-4">
                     {/* Action bar */}
                     {canManage && (
@@ -442,7 +442,7 @@ export default function AdminManagerPage() {
                     )}
                 </TabsContent>
 
-                {/* â”€â”€ Presets tab â”€â”€ */}
+                {/* - -  Presets tab - -  */}
                 <TabsContent value="presets" className="mt-0">
                     <PresetsTab
                         presets={presetsSwr.data ?? []}
@@ -453,7 +453,7 @@ export default function AdminManagerPage() {
                 </TabsContent>
             </Tabs>
 
-            {/* â”€â”€ Add / Edit dialog â”€â”€ */}
+            {/* - -  Add / Edit dialog - -  */}
             {editTarget !== null && (
                 <AdminEditDialog
                     target={editTarget}
@@ -471,7 +471,7 @@ export default function AdminManagerPage() {
                 />
             )}
 
-            {/* â”€â”€ Reset Password result dialog â”€â”€ */}
+            {/* - -  Reset Password result dialog - -  */}
             {resetPasswordResult && (
                 <Dialog open onOpenChange={() => setResetPasswordResult(null)}>
                     <DialogContent className="max-w-md">
@@ -494,7 +494,7 @@ export default function AdminManagerPage() {
                 </Dialog>
             )}
 
-            {/* â”€â”€ Bulk Apply Permissions dialog â”€â”€ */}
+            {/* - -  Bulk Apply Permissions dialog - -  */}
             {showBulkPermDialog && (
                 <Dialog open onOpenChange={() => setShowBulkPermDialog(false)}>
                     <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col overflow-hidden">

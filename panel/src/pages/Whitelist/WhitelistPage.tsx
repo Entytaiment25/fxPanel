@@ -390,7 +390,7 @@ function RequestsTab() {
                                         </td>
                                         <td className="px-4 py-2.5 font-medium">{req.playerDisplayName}</td>
                                         <td className="text-muted-foreground px-4 py-2.5">
-                                            {req.discordTag || <span className="italic">â€”</span>}
+                                            {req.discordTag || <span className="italic"> - </span>}
                                         </td>
                                         <td className="text-muted-foreground px-4 py-2.5">
                                             {tsToLocaleDateTimeString(req.tsLastAttempt, 'short', 'short')}

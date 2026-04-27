@@ -36,12 +36,14 @@ import { theme } from '../../styles/theme';
 // Types
 // =============================================
 
-/** Only allow https:// image URLs from trusted sources to prevent XSS/tracking via arbitrary URLs. */
-const ALLOWED_IMAGE_ORIGINS = ['https://i.imgur.com', 'https://cdn.discordapp.com', 'https://media.discordapp.net'];
+/** Allow HTTPS image URLs from any host that serve a known image file extension. */
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
 function validateImageUrl(url: string): boolean {
     try {
         const parsed = new URL(url);
-        return parsed.protocol === 'https:' && ALLOWED_IMAGE_ORIGINS.some((o) => parsed.origin === o);
+        if (parsed.protocol !== 'https:') return false;
+        const pathname = parsed.pathname.toLowerCase();
+        return IMAGE_EXTENSIONS.some((ext) => pathname.endsWith(ext));
     } catch {
         return false;
     }
@@ -264,7 +266,7 @@ const TicketDetailView: React.FC<{
             </Box>
 
             {/* Messages */}
-            <Box flex={1} overflow="auto" display="flex" flexDirection="column" gap={0.75} mb={1}>
+            <Box flex={1} minHeight={0} overflow="auto" display="flex" flexDirection="column" gap={0.75} mb={1}>
                 {ticket.messages.length === 0 && (
                     <Typography variant="body2" sx={{ color: theme.muted }} textAlign="center" py={2}>
                         No messages yet. Send a reply below.
@@ -367,7 +369,7 @@ const TicketDetailView: React.FC<{
             )}
 
             {/* Status controls */}
-            <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1} pb={1}>
                 {ticket.status === 'open' && (
                     <Button
                         size="small"

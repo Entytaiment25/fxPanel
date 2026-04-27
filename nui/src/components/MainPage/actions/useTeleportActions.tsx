@@ -2,6 +2,7 @@ import React from 'react';
 import { FileCopy, GpsFixed, PersonPinCircle, Restore } from '@mui/icons-material';
 import { useDialogContext } from '../../../provider/DialogProvider';
 import { fetchNui } from '../../../utils/fetchNui';
+import { copyToClipboard } from '../../../utils/copyToClipboard';
 import { useTranslate } from 'react-polyglot';
 import { useSnackbar } from 'notistack';
 import { TeleportMode, useTeleportMode } from '../../../state/teleportmode.state';
@@ -46,8 +47,16 @@ export function useTeleportActions() {
     };
 
     const handleCopyCoords = () => {
-        fetchNui('copyCurrentCoords')
-            .then(() => {
+        fetchNui<{ coords: string }>('copyCurrentCoords')
+            .then((data) => {
+                if (data?.coords) {
+                    // Parse as floats and re-format to break taint chain and ensure only numeric data
+                    const parts = String(data.coords).split(',').map((s) => parseFloat(s.trim()));
+                    if (parts.length >= 3 && parts.every((n) => isFinite(n))) {
+                        const safeCoords = parts.map((n) => n.toFixed(4)).join(', ');
+                        navigator.clipboard.writeText(safeCoords).catch(() => {});
+                    }
+                }
                 enqueueSnackbar(t('nui_menu.common.copied'), { variant: 'success' });
             })
             .catch(() => {

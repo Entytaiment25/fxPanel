@@ -159,7 +159,7 @@ export default function DangerZoneTab() {
             )}
             {!isWebInterface && (
                 <div className="border-warning/30 bg-warning-hint rounded-lg border p-4 text-center text-sm">
-                    <strong>Warning:</strong> These functions are disabled for the in-game menu â€” please use the web
+                    <strong>Warning:</strong> These functions are disabled for the in-game menu - please use the web
                     version.
                 </div>
             )}
@@ -192,7 +192,7 @@ export default function DangerZoneTab() {
                     <h3 className="font-semibold">Revoke Whitelists</h3>
                     <p className="text-muted-foreground text-sm">
                         Revoke whitelist from players that haven't joined recently. Only applies to license whitelist
-                        â€” not Discord member or role whitelist.
+                        - not Discord member or role whitelist.
                     </p>
                 </div>
                 <div className="space-y-4 p-5">
@@ -234,7 +234,7 @@ export default function DangerZoneTab() {
                     <h3 className="font-semibold">Clean Database</h3>
                     <p className="text-muted-foreground text-sm">
                         Permanently remove players and actions from the database. This action is{' '}
-                        <strong>irreversible</strong> â€” save a backup first.
+                        <strong>irreversible</strong> - save a backup first.
                     </p>
                 </div>
                 <div className="space-y-4 p-5">

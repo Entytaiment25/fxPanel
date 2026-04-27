@@ -25,6 +25,7 @@ import type {
     IntercomFeedbackReq,
     PlayerTicketSummary,
 } from '@shared/ticketApiTypes';
+import type { TicketActivityEntry } from '@shared/ticketApiTypes';
 const console = consoleFactory(modulename);
 
 //Consts
@@ -72,14 +73,14 @@ const sanitizeMessageImageUrls = (input: unknown): string[] | undefined => {
     return sanitized.length ? sanitized : undefined;
 };
 
-// â”€â”€ Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// - -  Helper - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 /**
  * Pulls server log entries from the recent buffer within the time window
  */
 const pullLogContext = (reporterNetid: number, targetNetids: number[], tsReport: number) => {
     const windowStart = tsReport - LOG_CONTEXT_WINDOW;
-    const allLogs: any[] = txCore.logger.server.getRecentBuffer();
+    const allLogs: any[] = txCore.logger.server.getRecentBuffer(500);
 
     const reporterLogs: TicketLogEntry[] = [];
     const targetLogs: TicketLogEntry[] = [];
@@ -153,10 +154,10 @@ const notifyPlayerNewMessage = (ticketId: string, message: Omit<TicketMessage, '
     });
 };
 
-// â”€â”€ Web Panel endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// - -  Web Panel endpoints - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 /**
- * GET /reports/list â€” Returns all tickets (for web panel)
+ * GET /reports/list - Returns all tickets (for web panel)
  */
 export const ticketsList = async (ctx: AuthedCtx) => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -191,7 +192,7 @@ export const ticketsList = async (ctx: AuthedCtx) => {
 };
 
 /**
- * GET /reports/detail?id=xxx â€” Returns full ticket detail (staffNotes included for admins)
+ * GET /reports/detail?id=xxx - Returns full ticket detail (staffNotes included for admins)
  */
 export const ticketsDetail = async (ctx: AuthedCtx) => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -219,7 +220,7 @@ export const ticketsDetail = async (ctx: AuthedCtx) => {
 };
 
 /**
- * POST /reports/message â€” Admin adds a message to a ticket
+ * POST /reports/message - Admin adds a message to a ticket
  */
 export const ticketsMessage = async (ctx: AuthedCtx) => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -280,7 +281,7 @@ export const ticketsMessage = async (ctx: AuthedCtx) => {
 };
 
 /**
- * POST /reports/status â€” Admin changes ticket status
+ * POST /reports/status - Admin changes ticket status
  */
 export const ticketsStatus = async (ctx: AuthedCtx) => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -325,7 +326,7 @@ export const ticketsStatus = async (ctx: AuthedCtx) => {
 };
 
 /**
- * POST /reports/claim â€” Claim or unclaim a ticket
+ * POST /reports/claim - Claim or unclaim a ticket
  */
 export const ticketsClaim = async (ctx: AuthedCtx) => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -353,7 +354,7 @@ export const ticketsClaim = async (ctx: AuthedCtx) => {
             return ctx.send<ApiTicketClaimResp>({ error: 'Failed to update claim.' });
         }
 
-        return ctx.send<ApiTicketClaimResp>({ success: true, claimedBy: newClaimer ?? undefined });
+        return ctx.send<ApiTicketClaimResp>({ success: true, claimedBy: newClaimer });
     } catch (error) {
         console.error(`Failed to claim ticket: ${emsg(error)}`);
         return ctx.send<ApiTicketClaimResp>({ error: 'Failed to claim ticket.' });
@@ -361,7 +362,7 @@ export const ticketsClaim = async (ctx: AuthedCtx) => {
 };
 
 /**
- * POST /reports/note â€” Add a staff note to a ticket
+ * POST /reports/note - Add a staff note to a ticket
  */
 export const ticketsNote = async (ctx: AuthedCtx) => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -386,6 +387,11 @@ export const ticketsNote = async (ctx: AuthedCtx) => {
         if (!success) {
             return ctx.send<ApiTicketNoteResp>({ error: 'Ticket not found.' });
         }
+        txCore.database.tickets.addActivityEntry(id, {
+            ts: now(),
+            adminName: ctx.admin.name,
+            action: 'note_added',
+        } satisfies TicketActivityEntry);
         return ctx.send<ApiTicketNoteResp>({ success: true });
     } catch (error) {
         console.error(`Failed to add staff note: ${emsg(error)}`);
@@ -394,7 +400,7 @@ export const ticketsNote = async (ctx: AuthedCtx) => {
 };
 
 /**
- * DELETE /reports/note â€” Delete a staff note from a ticket
+ * DELETE /reports/note - Delete a staff note from a ticket
  */
 export const ticketsNoteDelete = async (ctx: AuthedCtx) => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -414,6 +420,11 @@ export const ticketsNoteDelete = async (ctx: AuthedCtx) => {
         if (!success) {
             return ctx.send<ApiTicketNoteResp>({ error: 'Note not found.' });
         }
+        txCore.database.tickets.addActivityEntry(id, {
+            ts: now(),
+            adminName: ctx.admin.name,
+            action: 'note_deleted',
+        } satisfies TicketActivityEntry);
         return ctx.send<ApiTicketNoteResp>({ success: true });
     } catch (error) {
         console.error(`Failed to delete staff note: ${emsg(error)}`);
@@ -422,7 +433,7 @@ export const ticketsNoteDelete = async (ctx: AuthedCtx) => {
 };
 
 /**
- * GET /reports/analytics â€” Returns analytics data
+ * GET /reports/analytics - Returns analytics data
  */
 export const ticketsAnalytics = async (ctx: AuthedCtx) => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -442,23 +453,27 @@ export const ticketsAnalytics = async (ctx: AuthedCtx) => {
 };
 
 /**
- * GET /reports/config â€” Returns ticket categories and config for UI
+ * GET /reports/config - Returns ticket categories and config for UI
  */
 export const ticketsConfig = async (ctx: AuthedCtx) => {
     if (!ctx.admin.testPermission('players.reports', modulename)) {
         return ctx.send<ApiGetTicketConfigResp>({ error: 'Unauthorized' });
     }
 
+    const categoryDescriptions = Object.fromEntries(
+        Object.entries(txConfig.gameFeatures.ticketCategoryDescriptions).map(([key, value]) => [key, String(value)]),
+    ) as Record<string, string>;
+
     return ctx.send<ApiGetTicketConfigResp>({
-        categories: txConfig.gameFeatures.ticketCategories,
-        categoryDescriptions: txConfig.gameFeatures.ticketCategoryDescriptions,
+        categories: [...txConfig.gameFeatures.ticketCategories],
+        categoryDescriptions,
         priorityEnabled: txConfig.gameFeatures.ticketPriorityEnabled,
         feedbackEnabled: txConfig.gameFeatures.ticketFeedbackEnabled,
     });
 };
 
 /**
- * GET /reports/screenshot/:id â€” Serves a stored ticket screenshot
+ * GET /reports/screenshot/:id - Serves a stored ticket screenshot
  */
 export const ticketsScreenshot = async (ctx: InitializedCtx) => {
     const id = (ctx.params as Record<string, string>).id;
@@ -482,10 +497,10 @@ export const ticketsScreenshot = async (ctx: InitializedCtx) => {
     }
 };
 
-// â”€â”€ Intercom handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// - -  Intercom handlers - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 /**
- * ticketCreate intercom â€” Player files a new ticket
+ * ticketCreate intercom - Player files a new ticket
  */
 export const ticketCreate = async (data: IntercomTicketCreateReq): Promise<ApiCreateTicketResp> => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -576,7 +591,7 @@ export const ticketCreate = async (data: IntercomTicketCreateReq): Promise<ApiCr
 };
 
 /**
- * ticketPlayerList intercom â€” Returns player's own tickets
+ * ticketPlayerList intercom - Returns player's own tickets
  */
 export const ticketPlayerList = (playerLicense: string): ApiGetPlayerTicketsResp => {
     if (!txConfig.gameFeatures.reportsEnabled) {
@@ -682,7 +697,7 @@ export const ticketPlayerMessage = (
 };
 
 /**
- * ticketFeedbackSubmit intercom â€” Player submits feedback for a resolved ticket
+ * ticketFeedbackSubmit intercom - Player submits feedback for a resolved ticket
  */
 export const ticketFeedbackSubmit = (data: IntercomFeedbackReq): { success: true } | { error: string } => {
     if (!txConfig.gameFeatures.ticketFeedbackEnabled) {
@@ -821,6 +836,11 @@ function addStaffNote(ticketId: string, adminName: string, content: string): { s
         ts: now(),
     });
     if (!success) return { error: 'Ticket not found.' };
+    txCore.database.tickets.addActivityEntry(ticketId, {
+        ts: now(),
+        adminName,
+        action: 'note_added',
+    });
     return { success: true };
 }
 
@@ -828,7 +848,7 @@ function addStaffNote(ticketId: string, adminName: string, content: string): { s
  * Toggles a ticket's claim by `adminName`: clears it if already claimed by
  * this admin, otherwise assigns it.
  */
-function toggleClaim(ticketId: string, adminName: string): { success: true; claimedBy?: string } | { error: string } {
+function toggleClaim(ticketId: string, adminName: string): { success: true; claimedBy: string | null } | { error: string } {
     const lookup = fetchTicketOrError(ticketId);
     if (lookup.kind === 'error') return { error: lookup.message };
     const ticket = lookup.ticket;
@@ -836,7 +856,7 @@ function toggleClaim(ticketId: string, adminName: string): { success: true; clai
     const newClaimer = ticket.claimedBy === adminName ? null : adminName;
     const success = txCore.database.tickets.setClaimed(ticketId, newClaimer);
     if (!success) return { error: 'Failed to update claim.' };
-    return { success: true, claimedBy: newClaimer ?? undefined };
+    return { success: true, claimedBy: newClaimer };
 }
 
 export const ticketAdminList = (): ApiGetTicketListResp => {
@@ -941,7 +961,7 @@ export const ticketAdminClaim = (ticketId: string, adminName: string): ApiTicket
 };
 
 /**
- * ticketScreenshotUpload intercom â€” Receives base64 PNG from Lua resource
+ * ticketScreenshotUpload intercom - Receives base64 PNG from Lua resource
  */
 export const ticketScreenshotUpload = async (
     ticketId: string,
@@ -981,7 +1001,7 @@ export const ticketScreenshotUpload = async (
     }
 };
 
-// â”€â”€ Backward-compat exports (for any existing code still using old names) â”€â”€
+// - -  Backward-compat exports (for any existing code still using old names) - - 
 export const reportsList = ticketsList;
 export const reportsDetail = ticketsDetail;
 export const reportsMessage = ticketsMessage;

@@ -74,6 +74,14 @@ export type TicketLogContext = {
     world: TicketLogEntry[];
 };
 
+// ── Activity entry (ticket audit trail) ──
+export type TicketActivityEntry = {
+    ts: number;
+    adminName: string;
+    action: string;
+    details?: string;
+};
+
 // ── Core DB record ──
 export type DatabaseTicketType = {
     id: string; // format: TKT-XXXXX
@@ -86,6 +94,7 @@ export type DatabaseTicketType = {
     screenshotUrl?: string;
     messages: TicketMessage[];
     staffNotes: StaffNote[];
+    activityLog: TicketActivityEntry[];
     feedback?: PlayerFeedback;
     logContext: TicketLogContext;
     claimedBy?: string;

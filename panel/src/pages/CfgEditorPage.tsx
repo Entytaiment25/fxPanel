@@ -116,7 +116,7 @@ export default function CfgEditorPage() {
         const cfgData = editorRef.current?.getValue() ?? editorContent;
         if (cfgData.length < 1024 && currentFile === mainCfgName) {
             txToast.warning(
-                "Your CFG file is very small â€” there is a good chance you deleted something you shouldn't. A backup file will be saved just in case.",
+                "Your CFG file is very small - there is a good chance you deleted something you shouldn't. A backup file will be saved just in case.",
             );
         }
 
@@ -178,8 +178,8 @@ export default function CfgEditorPage() {
 
     const fileHint =
         currentFile === mainCfgName
-            ? '(main server config â€” validated on save)'
-            : '(auxiliary config â€” saved without validation)';
+            ? '(main server config - validated on save)'
+            : '(auxiliary config - saved without validation)';
 
     return (
         <div className="h-contentvh flex w-full flex-col gap-3 px-2 md:px-0">

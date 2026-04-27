@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { copyToClipboard } from '@/lib/utils';
 import { useBackendApi } from '@/hooks/fetch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -56,12 +57,14 @@ const statusVariants: Record<TicketStatus, 'default' | 'secondary' | 'outline-so
     closed: 'outline-solid',
 };
 
-/** Only allow https:// image URLs from trusted sources to prevent XSS/tracking via arbitrary URLs. */
-const ALLOWED_IMAGE_ORIGINS = ['https://i.imgur.com', 'https://cdn.discordapp.com', 'https://media.discordapp.net'];
+/** Allow HTTPS image URLs from any host that serve a known image file extension. */
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
 function isAllowedImageUrl(url: string): boolean {
     try {
         const parsed = new URL(url);
-        return parsed.protocol === 'https:' && ALLOWED_IMAGE_ORIGINS.some((o) => parsed.origin === o);
+        if (parsed.protocol !== 'https:') return false;
+        const pathname = parsed.pathname.toLowerCase();
+        return IMAGE_EXTENSIONS.some((ext) => pathname.endsWith(ext));
     } catch {
         return false;
     }
@@ -87,6 +90,7 @@ export default function TicketDetailModal({
     const [addingNote, setAddingNote] = useState(false);
     const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+    const surrogateRef = useRef<HTMLDivElement>(null);
     const openPlayerModal = useOpenPlayerModal();
 
     const detailApi = useBackendApi<ApiGetTicketDetailResp>({
@@ -208,12 +212,9 @@ export default function TicketDetailModal({
 
     const copyTicketLink = () => {
         const url = `${window.location.origin}/reports?ticket=${ticketId}`;
-        navigator.clipboard.writeText(url).then(
+        copyToClipboard(url, surrogateRef.current ?? document.body as unknown as HTMLDivElement).then(
             () => txToast.success('Link copied!'),
-            (err) => {
-                console.error('Failed to copy ticket link:', err);
-                txToast.error('Failed to copy link');
-            },
+            () => txToast.error('Failed to copy link'),
         );
     };
 
@@ -221,6 +222,7 @@ export default function TicketDetailModal({
 
     return (
         <>
+            <div ref={surrogateRef} style={{ position: 'fixed', top: 0, left: 0, width: 0, height: 0, overflow: 'hidden' }} aria-hidden />
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col">
                     <DialogHeader>
@@ -310,9 +312,9 @@ export default function TicketDetailModal({
                                 </TabsTrigger>
                             </TabsList>
 
-                            {/* â”€â”€ Conversation â”€â”€ */}
+                            {/* Conversation */}
                             <TabsContent value="conversation" className="mt-0 flex min-h-0 flex-1 flex-col">
-                                <ScrollArea className="max-h-[380px] flex-1 px-1">
+                                <ScrollArea className="flex-1 px-1">
                                     <div className="space-y-2 py-2">
                                         {/* Screenshot preview */}
                                         {ticket.screenshotUrl && (
@@ -402,9 +404,9 @@ export default function TicketDetailModal({
                                 )}
                             </TabsContent>
 
-                            {/* â”€â”€ Staff Notes â”€â”€ */}
+                            {/* Staff Notes */}
                             <TabsContent value="notes" className="mt-0 flex min-h-0 flex-1 flex-col">
-                                <ScrollArea className="max-h-[340px] flex-1 px-1">
+                                <ScrollArea className="flex-1 px-1">
                                     <div className="space-y-2 py-2">
                                         {(ticket.staffNotes?.length ?? 0) === 0 && (
                                             <p className="text-muted-foreground py-4 text-center text-sm">
@@ -447,10 +449,13 @@ export default function TicketDetailModal({
                                 </div>
                             </TabsContent>
 
-                            {/* â”€â”€ Logs â”€â”€ */}
+                            {/* Logs */}
                             <TabsContent value="logs" className="mt-0 min-h-0 flex-1">
                                 <ScrollArea className="max-h-[450px]">
                                     <div className="space-y-3 py-2">
+                                        {(ticket.activityLog?.length ?? 0) > 0 && (
+                                            <ActivitySection entries={ticket.activityLog ?? []} />
+                                        )}
                                         {ticket.logContext.reporter.length > 0 && (
                                             <LogSection title="Reporter Logs" entries={ticket.logContext.reporter} />
                                         )}
@@ -460,7 +465,8 @@ export default function TicketDetailModal({
                                         {ticket.logContext.world.length > 0 && (
                                             <LogSection title="World Events" entries={ticket.logContext.world} />
                                         )}
-                                        {ticket.logContext.reporter.length === 0 &&
+                                        {(ticket.activityLog?.length ?? 0) === 0 &&
+                                            ticket.logContext.reporter.length === 0 &&
                                             ticket.logContext.targets.length === 0 &&
                                             ticket.logContext.world.length === 0 && (
                                                 <p className="text-muted-foreground py-4 text-center text-sm">
@@ -471,7 +477,7 @@ export default function TicketDetailModal({
                                 </ScrollArea>
                             </TabsContent>
 
-                            {/* â”€â”€ Info â”€â”€ */}
+                            {/* Info */}
                             <TabsContent value="info" className="mt-0">
                                 <div className="space-y-3 py-2">
                                     <InfoRow label="Category" value={ticket.category} />
@@ -489,7 +495,7 @@ export default function TicketDetailModal({
                                     {ticket.feedback && (
                                         <InfoRow
                                             label="Feedback"
-                                            value={`${'â˜…'.repeat(ticket.feedback.rating)}${'â˜†'.repeat(5 - ticket.feedback.rating)}${ticket.feedback.comment ? ` â€” ${ticket.feedback.comment}` : ''}`}
+                                            value={`${'*'.repeat(ticket.feedback.rating)}${'-'.repeat(5 - ticket.feedback.rating)}${ticket.feedback.comment ? ` - ${ticket.feedback.comment}` : ''}`}
                                         />
                                     )}
 
@@ -546,7 +552,7 @@ export default function TicketDetailModal({
     );
 }
 
-// â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Sub-components
 
 function MessageBubble({
     author,
@@ -657,6 +663,32 @@ function LogSection({ title, entries }: { title: string; entries: TicketLogEntry
                             <span className="text-muted-foreground shrink-0">[{entry.type}]</span>
                             {entry.src.name && <span className="text-foreground/70 shrink-0">{entry.src.name}</span>}
                             <span className="truncate">{entry.msg}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function ActivitySection({ entries }: { entries: DatabaseTicketType['activityLog'] }) {
+    return (
+        <div>
+            <h4 className="text-muted-foreground mb-1.5 text-xs font-medium">Ticket Activity</h4>
+            <div className="bg-muted/30 space-y-0.5 rounded-lg border p-2">
+                {entries.map((entry, i) => {
+                    const time = new Date(entry.ts * 1000).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                    });
+                    const actionLabel = entry.action.replace(/_/g, ' ');
+                    return (
+                        <div key={i} className="flex gap-2 font-mono text-xs">
+                            <span className="text-muted-foreground shrink-0">{time}</span>
+                            <span className="text-muted-foreground shrink-0">[activity]</span>
+                            <span className="text-foreground/70 shrink-0">{entry.adminName}</span>
+                            <span className="truncate">{entry.details ? `${actionLabel}: ${entry.details}` : actionLabel}</span>
                         </div>
                     );
                 })}
