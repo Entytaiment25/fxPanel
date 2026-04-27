@@ -62,6 +62,7 @@ export default class AddonManager {
     private fileWatcher: AddonFileWatcher | null = null;
     private publicServer: AddonPublicServer | null = null;
     private readonly crashRestartTimers = new Map<string, ReturnType<typeof setTimeout>>();
+    private hasLoggedInPlaceStaticMode = false;
 
     constructor() {
         // Resolve paths
@@ -1225,6 +1226,12 @@ export default class AddonManager {
         const monitorNuiAddonsRoot = path.join(monitorRoot, 'nui', 'addons');
         const monitorStaticAddonsRoot = path.join(monitorRoot, 'addons');
         const isStaticRootSourceAddons = path.resolve(monitorStaticAddonsRoot) === path.resolve(this.addonsDir);
+        if (isStaticRootSourceAddons && !this.hasLoggedInPlaceStaticMode) {
+            this.hasLoggedInPlaceStaticMode = true;
+            console.debug(
+                `Static addon assets are already served in-place from ${monitorStaticAddonsRoot}; skipping static mirror/prune`,
+            );
+        }
 
         const copyDirRecursive = async (sourceDir: string, targetDir: string): Promise<void> => {
             await fs.promises.mkdir(targetDir, { recursive: true });
@@ -1273,9 +1280,7 @@ export default class AddonManager {
 
         await pruneStaleDirs(monitorNuiAddonsRoot);
         if (isStaticRootSourceAddons) {
-            console.error(
-                `Refusing to prune static addon dirs because target root equals source addons dir: ${monitorStaticAddonsRoot}`,
-            );
+            // In in-place mode, pruning would delete source addon directories.
         } else {
             await pruneStaleDirs(monitorStaticAddonsRoot);
         }
@@ -1301,9 +1306,7 @@ export default class AddonManager {
                 const targetAddonRoot = path.join(monitorStaticAddonsRoot, addonId);
                 const targetStaticDir = path.join(targetAddonRoot, 'static');
                 if (isStaticRootSourceAddons) {
-                    console.error(
-                        `Refusing to sync static assets for addon '${addonId}' because target root equals source addons dir`,
-                    );
+                    // In in-place mode, addon static files are already served from monitor/addons/{addonId}/static.
                     continue;
                 }
 

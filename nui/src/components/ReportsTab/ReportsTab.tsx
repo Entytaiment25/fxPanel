@@ -9,6 +9,7 @@ import {
     InputAdornment,
     InputLabel,
     MenuItem,
+    Modal,
     Select,
     TextField,
     Tooltip,
@@ -175,6 +176,7 @@ const TicketDetailView: React.FC<{
     changingStatus: boolean;
 }> = ({ ticket, onBack, onSendMessage, onStatusChange, sendingMessage, changingStatus }) => {
     const [msgText, setMsgText] = useState('');
+    const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
     const handleSend = () => {
         if (!msgText.trim()) return;
@@ -319,11 +321,13 @@ const TicketDetailView: React.FC<{
                                         component="img"
                                         src={url}
                                         alt="attachment"
+                                        onClick={() => setLightboxUrl(url)}
                                         sx={{
                                             maxHeight: 80,
                                             maxWidth: 120,
                                             borderRadius: 0.5,
                                             border: `1px solid ${theme.border}`,
+                                            cursor: 'zoom-in',
                                         }}
                                     />
                                 ))}
@@ -332,6 +336,38 @@ const TicketDetailView: React.FC<{
                     </Box>
                 ))}
             </Box>
+
+            <Modal open={!!lightboxUrl} onClose={() => setLightboxUrl(null)}>
+                <Box
+                    onClick={() => setLightboxUrl(null)}
+                    sx={{
+                        position: 'fixed',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(0,0,0,0.85)',
+                        cursor: 'zoom-out',
+                    }}
+                >
+                    {lightboxUrl && (
+                        <Box
+                            component="img"
+                            src={lightboxUrl}
+                            alt="attachment enlarged"
+                            referrerPolicy="no-referrer"
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                            onError={() => setLightboxUrl(null)}
+                            sx={{
+                                maxWidth: '92vw',
+                                maxHeight: '92vh',
+                                borderRadius: 1,
+                                cursor: 'default',
+                            }}
+                        />
+                    )}
+                </Box>
+            </Modal>
 
             {/* Reply box — hidden for terminal statuses */}
             {!isTerminal && (
