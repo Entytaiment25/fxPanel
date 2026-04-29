@@ -122,6 +122,26 @@ export const getTermLineInitialData = (line: string): TerminalMarkerGetterResult
 };
 
 /**
+ * Checks if a terminal line contains a player license identifier
+ */
+export const getTermLinePlayerData = (line: string): TerminalMarkerGetterResult => {
+    const clean = sanitizeTermLine(line);
+    const match = clean.match(/license:[0-9a-fA-F]{40}/);
+    if (!match) return;
+    const license = match[0];
+    return {
+        markerData: {
+            classes: 'bg-accent text-accent-foreground',
+            labelShort: 'PLAYER',
+            labelLong: 'VIEW PLAYER',
+            onClick: () => {
+                (window as any).txAdminApi?.openPlayerModal?.({ license });
+            },
+        },
+    };
+};
+
+/**
  * Registers a line marker & decoration
  */
 export const registerTermLineMarker = (term: Terminal, markerData: TerminalMarkerData) => {

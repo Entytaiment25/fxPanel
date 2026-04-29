@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { openExternalLink } from '@/lib/navigation';
-import { KeyRoundIcon, LogOutIcon, MenuIcon, UsersIcon, CircleIcon, MoonIcon, SunIcon } from 'lucide-react';
+import { KeyRoundIcon, LogOutIcon, MenuIcon, UsersIcon, CircleIcon } from 'lucide-react';
 import Avatar from '@/components/Avatar';
 import { useAuth } from '@/hooks/auth';
 import { useGlobalMenuSheet, usePlayerlistSheet } from '@/hooks/sheets';
@@ -17,7 +17,6 @@ import { serverNameAtom, fxRunnerStateAtom } from '@/hooks/status';
 import { playerCountAtom } from '@/hooks/playerlist';
 import { useAccountModal } from '@/hooks/dialogs';
 import { useAddonWidgets } from '@/hooks/addons';
-import { useIsDarkMode, useToggleTheme } from '@/hooks/theme';
 
 // ─── Identity block (name + status) ───────────────────────────────────────────
 function ServerIdentity() {
@@ -146,22 +145,15 @@ export function Header() {
     const { setIsSheetOpen: openMenu } = useGlobalMenuSheet();
     const { setIsSheetOpen: openPlayers } = usePlayerlistSheet();
     const playerCount = useAtomValue(playerCountAtom);
-    const toggleTheme = useToggleTheme();
-    const isDarkMode = useIsDarkMode();
 
     return (
-        <header className="border-border/40 bg-background/95 sticky top-0 z-20 border-b shadow-lg shadow-black/10 backdrop-blur-sm dark:shadow-black/30 lg:hidden">
+        <header className="border-border/40 bg-[#0c0e16]/95 sticky top-0 z-20 border-b shadow-lg shadow-black/10 backdrop-blur-sm dark:shadow-black/30 lg:hidden">
             <div className="flex h-14 w-full items-center gap-2 px-3">
                 <IconButton label="Open menu" icon={<MenuIcon />} onClick={() => openMenu(true)} />
                 <div className="bg-border/40 h-6 w-px" />
                 <div className="min-w-0 flex-1">
                     <ServerIdentity />
                 </div>
-                <IconButton
-                    label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                    icon={isDarkMode ? <SunIcon /> : <MoonIcon />}
-                    onClick={toggleTheme}
-                />
                 <IconButton
                     label="Players"
                     icon={<UsersIcon />}

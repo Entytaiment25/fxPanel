@@ -187,7 +187,7 @@ const TicketDetailView: React.FC<{
     const isTerminal = ticket.status === 'resolved' || ticket.status === 'closed';
 
     return (
-        <Box display="flex" flexDirection="column" height="100%" color={theme.fg}>
+        <Box display="flex" flexDirection="column" flex={1} minHeight={0} color={theme.fg}>
             {/* Header */}
             <Box display="flex" alignItems="center" gap={1} mb={1}>
                 <IconButton size="small" onClick={onBack} sx={{ color: theme.fg }}>

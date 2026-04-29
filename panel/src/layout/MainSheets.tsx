@@ -9,7 +9,6 @@ import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 import {
     SidebarNavContent,
     ServerStatusCard,
-    SidebarThemeToggle,
     SidebarUserButton,
     SidebarCollapsedCtx,
 } from './LeftSidebar';
@@ -25,7 +24,7 @@ export function GlobalMenuSheet() {
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetContent
                 side="left"
-                className="xs:w-80 border-border/40 bg-background flex w-full flex-col gap-0 p-0 select-none"
+                className="xs:w-80 border-border/40 bg-[#0c0e16] flex w-full flex-col gap-0 p-0 select-none"
                 onOpenAutoFocus={(e) => e.preventDefault()}
             >
                 <SidebarCollapsedCtx.Provider value={false}>
@@ -50,7 +49,6 @@ export function GlobalMenuSheet() {
                     {/* Bottom: server status + user */}
                     <div className="border-border/40 flex shrink-0 flex-col gap-2 border-t p-3">
                         <ServerStatusCard />
-                        <SidebarThemeToggle />
                         <SidebarUserButton />
                     </div>
                 </SidebarCollapsedCtx.Provider>

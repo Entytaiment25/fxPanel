@@ -102,6 +102,9 @@
     }
     html {
         font-size: 12px;
+        @media (max-width: 767px) {
+            font-size: 14px;
+        }
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: hsl(var(--secondary)) hsl(var(--background));

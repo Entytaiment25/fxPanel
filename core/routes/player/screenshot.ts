@@ -67,7 +67,7 @@ export default async function PlayerScreenshot(ctx: AuthedCtx) {
         requestId,
     });
 
-    ctx.admin.logAction(`Screenshotted "${player.displayName}" from web panel.`);
+    ctx.admin.logAction(`Screenshotted "${player.displayName}" (${player.license}) from web panel.`);
 
     // Wait for the result
     const result = await resultPromise;

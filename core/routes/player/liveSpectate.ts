@@ -64,7 +64,7 @@ export async function LiveSpectateStart(ctx: AuthedCtx) {
         sessionId,
     });
 
-    ctx.admin.logAction(`Started live spectate of "${player.displayName}" from web panel.`);
+    ctx.admin.logAction(`Started live spectate of "${player.displayName}" (${player.license}) from web panel.`);
     console.verbose.log(
         `Admin "${ctx.admin.name}" started live spectate, player #${player.netid}, session ${sessionId}`,
     );
@@ -102,12 +102,12 @@ export async function LiveSpectateStop(ctx: AuthedCtx) {
 export function handleSpectateFrame(sessionId: string, frameData: string) {
     const session = activeSessions.get(sessionId);
     if (!session) {
-        console.warn(
+        console.verbose.warn(
             `[spectate] Frame for UNKNOWN session: ${sessionId} (activeSessions: ${[...activeSessions.keys()].join(', ')})`,
         );
         return;
     }
-    console.warn(
+    console.verbose.log(
         `[spectate] Emitting frame: session=${sessionId}, admin=${session.adminName}, len=${frameData.length}`,
     );
     txCore.webServer.webSocket.emitSpectateFrame(sessionId, frameData);

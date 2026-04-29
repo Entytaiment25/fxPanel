@@ -107,7 +107,7 @@ async function handleWarning(ctx: AuthedCtx, player: PlayerClass): Promise<Gener
     } catch (error) {
         return { error: `Failed to warn player: ${emsg(error)}` };
     }
-    ctx.admin.logAction(`Warned player "${player.displayName}": ${reason}`);
+    ctx.admin.logAction(`Warned player "${player.displayName}" (${player.license}): ${reason}`);
 
     // Dispatch `txAdmin:events:playerWarned`
     const warnEventData = {
@@ -178,7 +178,7 @@ async function handleBan(ctx: AuthedCtx, player: PlayerClass): Promise<GenericAp
     } catch (error) {
         return { error: `Failed to ban player: ${emsg(error)}` };
     }
-    ctx.admin.logAction(`Banned player "${player.displayName}": ${reason}`);
+    ctx.admin.logAction(`Banned player "${player.displayName}" (${player.license}): ${reason}`);
 
     //No need to dispatch events if server is not online
     if (txCore.fxRunner.isIdle) {
@@ -320,7 +320,7 @@ async function handleDirectMessage(ctx: AuthedCtx, player: PlayerClass): Promise
     }
 
     try {
-        ctx.admin.logAction(`DM to "${player.displayName}": ${message}`);
+        ctx.admin.logAction(`DM to "${player.displayName}" (${player.license}): ${message}`);
 
         // Dispatch `txAdmin:events:playerDirectMessage`
         txCore.fxRunner.sendEvent('playerDirectMessage', {
@@ -367,7 +367,7 @@ async function handleKick(ctx: AuthedCtx, player: PlayerClass): Promise<GenericA
     }
 
     try {
-        ctx.admin.logAction(`Kicked "${player.displayName}": ${kickReason}`);
+        ctx.admin.logAction(`Kicked "${player.displayName}" (${player.license}): ${kickReason}`);
         const dropMessage = txCore.translator.t('kick_messages.player', { reason: kickReason });
 
         // Dispatch `txAdmin:events:playerKicked`
@@ -404,7 +404,7 @@ async function handleHeal(ctx: AuthedCtx, player: PlayerClass): Promise<GenericA
     }
 
     try {
-        ctx.admin.logAction(`Healed "${player.displayName}" from web panel.`);
+        ctx.admin.logAction(`Healed "${player.displayName}" (${player.license}) from web panel.`);
         txCore.fxRunner.sendEvent('webPlayerHealed', {
             target: player.netid,
             author: ctx.admin.name,
@@ -434,7 +434,7 @@ async function handleSpectate(ctx: AuthedCtx, player: PlayerClass): Promise<Gene
     }
 
     try {
-        ctx.admin.logAction(`Spectating "${player.displayName}" from web panel.`);
+        ctx.admin.logAction(`Spectating "${player.displayName}" (${player.license}) from web panel.`);
         txCore.fxRunner.sendEvent('webSpectatePlayer', {
             target: player.netid,
             adminName: ctx.admin.name,

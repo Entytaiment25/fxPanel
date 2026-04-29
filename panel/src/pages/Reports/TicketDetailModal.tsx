@@ -224,7 +224,7 @@ export default function TicketDetailModal({
         <>
             <div ref={surrogateRef} style={{ position: 'fixed', top: 0, left: 0, width: 0, height: 0, overflow: 'hidden' }} aria-hidden />
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col">
+                <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col overflow-hidden">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <TicketIcon className="h-5 w-5" />

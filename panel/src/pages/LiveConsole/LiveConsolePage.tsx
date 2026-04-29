@@ -35,6 +35,7 @@ import {
     getTermLineEventData,
     getTermLineInitialData,
     getTermLineRtlData,
+    getTermLinePlayerData,
     registerTermLineMarker,
 } from './liveConsoleMarkers';
 import { emsg } from '@shared/emsg';
@@ -275,7 +276,7 @@ export default function LiveConsolePage() {
                     isNewTs = true;
                     line = content;
                     termPrefixRef.current.ts = ts;
-                    termPrefixRef.current.prefix = formatTermTimestamp(ts, consoleOptions);
+                    termPrefixRef.current.prefix = formatTermTimestamp(ts, consoleOptionsRef.current);
                 }
             } catch (error) {
                 termPrefixRef.current.prefix = defaultTermPrefix;
@@ -291,7 +292,7 @@ export default function LiveConsolePage() {
             //Markers
             let writeCallback: (() => void) | undefined;
             try {
-                const res = getTermLineEventData(line) ?? getTermLineInitialData(line) ?? getTermLineRtlData(line); //https://github.com/xtermjs/xterm.js/issues/701
+                const res = getTermLineEventData(line) ?? getTermLineInitialData(line) ?? getTermLinePlayerData(line) ?? getTermLineRtlData(line); //https://github.com/xtermjs/xterm.js/issues/701
                 if (res && res.markerData) {
                     writeCallback = () => registerTermLineMarker(term, res.markerData);
                 }

@@ -143,7 +143,7 @@ const spectateFrameSchema = z
     .object({
         ...baseIntercomSchema,
         sessionId: z.string(),
-        frameData: z.string(),
+        frames: z.array(z.string()).min(1),
     })
     .strict();
 
@@ -558,9 +558,11 @@ export default async function Intercom(ctx: InitializedCtx) {
             const v = validateBody('spectateFrame');
             if (!v.ok) return ctx.utils.error(400, v.errorMsg);
             console.verbose.log(
-                `[spectate] Intercom frame received: session=${v.data.sessionId}, len=${v.data.frameData.length}`,
+                `[spectate] Intercom batch received: session=${v.data.sessionId}, frames=${v.data.frames.length}`,
             );
-            handleSpectateFrame(v.data.sessionId, v.data.frameData);
+            for (const frameData of v.data.frames) {
+                handleSpectateFrame(v.data.sessionId, frameData);
+            }
             return ctx.send({ success: true });
         }
         default: {
